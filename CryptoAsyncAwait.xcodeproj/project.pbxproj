@@ -38,6 +38,11 @@
 			path = CryptoAsyncAwaitTests;
 			sourceTree = "<group>";
 		};
+		95D6BBE22EA11B5700B5BEB9 /* .github */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = .github;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +69,7 @@
 		95D6BAEA2EA115E100B5BEB9 = {
 			isa = PBXGroup;
 			children = (
+				95D6BBE22EA11B5700B5BEB9 /* .github */,
 				95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */,
 				95D6BBD62EA119A000B5BEB9 /* CryptoAsyncAwaitTests.xctest */,
 				95D6BBD72EA119A000B5BEB9 /* CryptoAsyncAwaitTests */,
@@ -87,6 +93,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */,
+				95D6BBE22EA11B5700B5BEB9 /* .github */,
 			);
 			name = CryptoAsyncAwait;
 			packageProductDependencies = (
