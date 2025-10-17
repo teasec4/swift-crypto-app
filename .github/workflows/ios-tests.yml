@@ -19,23 +19,26 @@ jobs:
         with:
           xcode-version: 'latest-stable'
 
-      - name: Debug environment
+      - name: Build main app target first
         run: |
-          echo "📦 Xcode version:"
-          xcodebuild -version
-          echo "🧱 Available SDKs:"
-          xcodebuild -showsdks
-          echo "📱 Available Simulators:"
-          xcrun simctl list devices available
-
-      - name: Build and run tests
-        run: |
-          xcodebuild \
+          xcodebuild build \
             -project CryptoAsyncAwait.xcodeproj \
             -scheme CryptoAsyncAwait \
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
-            clean test \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO
+
+      - name: Run tests
+        run: |
+          xcodebuild test \
+            -project CryptoAsyncAwait.xcodeproj \
+            -scheme CryptoAsyncAwait \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             ONLY_ACTIVE_ARCH=NO

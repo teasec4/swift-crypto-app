@@ -18,3 +18,5 @@ final class MockCoinRepository: CoinRepositoryProtocol {
         return coinsToReturn
     }
 }
+
+
