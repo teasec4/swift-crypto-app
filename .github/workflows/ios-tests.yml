@@ -17,9 +17,7 @@ jobs:
       - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          # ⚙️ можно оставить твою версию, но CI не всегда имеет 26.0.1
-          # попробуем '16.0' для стабильности
-          xcode-version: '16.0'
+          xcode-version: 'latest-stable'
 
       - name: Debug environment
         run: |
@@ -30,18 +28,14 @@ jobs:
           echo "📱 Available Simulators:"
           xcrun simctl list devices available
 
-      - name: Get available simulator
-        id: find-sim
-        run: |
-          device=$(xcrun simctl list devices available | grep -m1 "iPhone" | sed -E 's/.*\(([-A-F0-9]+)\).*/\1/')
-          echo "device=$device" >> $GITHUB_OUTPUT
-          echo "Using simulator UDID: $device"
-
       - name: Build and run tests
         run: |
           xcodebuild \
             -project CryptoAsyncAwait.xcodeproj \
             -scheme CryptoAsyncAwait \
-            -destination "id=${{ steps.find-sim.outputs.device }}" \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             clean test \
-            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO
