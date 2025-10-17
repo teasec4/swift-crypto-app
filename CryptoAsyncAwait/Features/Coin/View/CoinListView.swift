@@ -46,7 +46,7 @@ struct CoinListView: View {
                 title: Text("Error"),
                 message: Text(coinListViewModel.errorMessage ?? "Something went wrong"),
                 dismissButton: .default(Text("OK")) {
-                    coinListViewModel.errorMessage = nil
+                    
                 }
             )
         }
