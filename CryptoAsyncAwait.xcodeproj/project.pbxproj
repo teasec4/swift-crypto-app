@@ -23,8 +23,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		95D6BAF32EA115E100B5BEB9 /* CryptoAsyncAwait.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = CryptoAsyncAwait.app; path = "/Users/yg_kovalev/Documents/swift-project/CryptoAsyncAwait/build/Debug-iphoneos/CryptoAsyncAwait.app"; sourceTree = "<absolute>"; };
 		95D6BBD62EA119A000B5BEB9 /* CryptoAsyncAwaitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CryptoAsyncAwaitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		95D6BBE42EA1D91300B5BEB9 /* CryptoAsyncAwait.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CryptoAsyncAwait.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -73,6 +73,7 @@
 				95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */,
 				95D6BBD62EA119A000B5BEB9 /* CryptoAsyncAwaitTests.xctest */,
 				95D6BBD72EA119A000B5BEB9 /* CryptoAsyncAwaitTests */,
+				95D6BBE42EA1D91300B5BEB9 /* CryptoAsyncAwait.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -102,7 +103,7 @@
 				95D6BBC12EA116EF00B5BEB9 /* Supabase */,
 			);
 			productName = CryptoAsyncAwait;
-			productReference = 95D6BAF32EA115E100B5BEB9 /* CryptoAsyncAwait.app */;
+			productReference = 95D6BBE42EA1D91300B5BEB9 /* CryptoAsyncAwait.app */;
 			productType = "com.apple.product-type.application";
 		};
 		95D6BBD52EA119A000B5BEB9 /* CryptoAsyncAwaitTests */ = {
@@ -349,6 +350,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -381,6 +383,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
