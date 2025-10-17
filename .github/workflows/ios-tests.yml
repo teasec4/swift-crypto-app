@@ -17,13 +17,22 @@ jobs:
       - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.0'
+          # стабильная версия с поддержкой iOS 17.x / 18.x
+          xcode-version: '15.4'
+
+      # 👇 Автоматически выбираем первый доступный iPhone симулятор
+      - name: Get available simulator
+        id: find-sim
+        run: |
+          device=$(xcrun simctl list devices available | grep -m1 "iPhone" | sed -E 's/.*\(([-A-F0-9]+)\).*/\1/')
+          echo "device=$device" >> $GITHUB_OUTPUT
+          echo "Using simulator UDID: $device"
 
       - name: Build and run tests
         run: |
           xcodebuild \
             -project CryptoAsyncAwait.xcodeproj \
             -scheme CryptoAsyncAwait \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=18.0' \
+            -destination "id=${{ steps.find-sim.outputs.device }}" \
             clean test \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
