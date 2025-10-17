@@ -30,7 +30,12 @@ final class CoinAPITests: XCTestCase {
         XCTAssertTrue(mockNetwork.requestedUrl?.absoluteString.contains("/coins/markets") ?? false)
         XCTAssertTrue(mockNetwork.requestedUrl?.absoluteString.contains("page=1") ?? false)
         
-        let url = mockNetwork.requestedUrl!.absoluteString
+        guard let requestedUrl = mockNetwork.requestedUrl else {
+            XCTFail("No request was made by the API")
+            return
+        }
+
+        let url = requestedUrl.absoluteString
         
         XCTAssertTrue(url.contains("vs_currency=usd"))
         XCTAssertTrue(url.contains("page=1"))
