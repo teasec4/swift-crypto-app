@@ -12,11 +12,25 @@ final class CoinListViewModel: ObservableObject {
     @Published var coins: [Coin] = []
     @Published var isLoading = false
     @Published private(set) var errorMessage: String?
-    @Published var hasLoadedInitially = false
+    @Published private(set) var hasLoadedInitially = false
+    
+    enum ScreenState{
+        case loading
+        case error(String)
+        case empty
+        case content([Coin])
+    }
+    
+    var screenState: ScreenState {
+        if isLoading {return .loading}
+        if let error = errorMessage {return .error(error)}
+        return coins.isEmpty ? .empty : .content(coins)
+    }
+    
 
     private let repository: CoinRepositoryProtocol
     
-    // Resolve dependency inside init to avoid referencing actor-isolated shared container in default parameter
+    
     init(repository: CoinRepositoryProtocol? = nil) {
         self.repository = repository ?? DependencyContainer.shared.coinRepository
     }
@@ -40,19 +54,15 @@ final class CoinListViewModel: ObservableObject {
 
     private func handleError(_ error: Error) {
         if let urlError = error as? URLError {
-            switch urlError.code {
-            case .notConnectedToInternet:
-                errorMessage = "No internet connection."
-            case .badURL:
-                errorMessage = "Invalid API URL."
-            case .badServerResponse:
-                errorMessage = "Server error."
-            default:
-                errorMessage = "Network error: \(urlError.localizedDescription)"
+            errorMessage = switch urlError.code {
+            case .notConnectedToInternet: "No internet connection."
+            case .badURL: "Invalid API URL."
+            case .badServerResponse: "Server error."
+            default: "Network error: \(urlError.localizedDescription)"
             }
         } else {
             errorMessage = "Unexpected error: \(error.localizedDescription)"
         }
-        print("❌ Error: \(errorMessage ?? "")")
+        print("❌ Error:", errorMessage ?? "Unknown")
     }
 }
