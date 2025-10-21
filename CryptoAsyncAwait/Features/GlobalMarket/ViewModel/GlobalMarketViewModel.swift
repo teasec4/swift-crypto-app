@@ -9,43 +9,39 @@ import Combine
 
 @MainActor
 final class GlobalMarketViewModel: ObservableObject {
-    @Published var totalMarketCap: Double?
-    @Published var change24h: Double?
-    @Published var totalVolume: Double?
-    @Published var isLoading = false
-    @Published private(set) var errorMessage: String?
+    @Published var state: StateView = .loading
+    
+    enum StateView {
+        case loading
+        case error(String)
+        case empty
+        case content(GlobalMarketData)
+    }
+    
+    private var isLoading: Bool = false
+    private var errorMessage: String = ""
     
     private let repository: GlobalRepositoryProtocol
     
     init(repository: GlobalRepositoryProtocol? = nil) {
-           self.repository = repository ?? DependencyContainer.shared.globalMarketRepository
-       }
+        self.repository = repository ?? DependencyContainer.shared.globalMarketRepository
+    }
     
     
     func loadGlobalData() async {
-        print("🌐 GlobalMarketViewModel.loadGlobalData() called")
         isLoading = true
         defer { isLoading = false }
-        
+
         do {
             let data = try await repository.getGlobalData()
-            self.totalMarketCap = data.totalMarketCap?["usd"] ?? 0.0
-            self.change24h = data.marketCapChangePercentage24hUsd ?? 0.0
-            self.totalVolume = data.totalVolume?["usd"] ?? 0.0
-            print("✅ Global data loaded successfully")
+            if let cap = data.totalMarketCap, cap.isEmpty == false {
+                state = .content(data)
+            } else {
+                state = .empty
+            }
         } catch {
-            handleError(error)
+            state = .error(error.localizedDescription)
         }
     }
     
-    func clearError() { errorMessage = nil }
-    
-    private func handleError(_ error: Error) {
-        if let coinError = error as? CoinError {
-            errorMessage = "\(coinError.localizedDescription)"
-        } else {
-            errorMessage = "Failed to load global data: \(error.localizedDescription)"
-        }
-        print("❌ GlobalMarketViewModel error:", errorMessage ?? "")
-    }
 }

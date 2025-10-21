@@ -1,20 +1,24 @@
 //
 //  GlobalMarketViewModelTest.swift
-//  CryptoAsyncAwait
+//  CryptoAsyncAwaitTests
 //
 //  Created by Максим Ковалев on 10/21/25.
 //
+
 import XCTest
 @testable import CryptoAsyncAwait
 
 @MainActor
-final class GlobalMarketViewModelTests: XCTestCase{
+final class GlobalMarketViewModelTests: XCTestCase {
     
-    func test_loadGlobalData_successfullyUpdateValues() async throws{
+    // MARK: - Успешная загрузка
+    func test_loadGlobalData_successfullyUpdatesStateToContent() async throws {
         // given
         let mockRepo = MockCoinRepository()
         mockRepo.globalData = GlobalMarketData(
-            totalMarketCap: ["usd" : 1_234_567_890], totalVolume: ["usd": 987_654_321], marketCapChangePercentage24hUsd: 2.5
+            totalMarketCap: ["usd": 1_234_567_890],
+            totalVolume: ["usd": 987_654_321],
+            marketCapChangePercentage24hUsd: 2.5
         )
         
         let viewModel = GlobalMarketViewModel(repository: mockRepo)
@@ -22,15 +26,19 @@ final class GlobalMarketViewModelTests: XCTestCase{
         // when
         await viewModel.loadGlobalData()
         
-        //then
-        XCTAssertFalse(viewModel.isLoading)
-        XCTAssertNil(viewModel.errorMessage)
-        XCTAssertEqual(viewModel.totalMarketCap, 1_234_567_890)
-        XCTAssertEqual(viewModel.totalVolume, 987_654_321)
-        XCTAssertEqual(viewModel.change24h, 2.5)
+        // then
+        switch viewModel.state {
+        case .content(let data):
+            XCTAssertEqual(data.totalMarketCap?["usd"], 1_234_567_890)
+            XCTAssertEqual(data.totalVolume?["usd"], 987_654_321)
+            XCTAssertEqual(data.marketCapChangePercentage24hUsd, 2.5)
+        default:
+            XCTFail("Expected .content state, but got \(viewModel.state)")
+        }
     }
     
-    func test_loadGLobalData_handlesErrorGracefully() async {
+    // MARK: - Ошибка загрузки
+    func test_loadGlobalData_setsErrorStateOnFailure() async {
         // given
         let mockRepo = MockCoinRepository()
         mockRepo.shouldThrowError = true
@@ -40,12 +48,36 @@ final class GlobalMarketViewModelTests: XCTestCase{
         // when
         await viewModel.loadGlobalData()
         
-        //then
-        XCTAssertNotNil(viewModel.errorMessage)
-        XCTAssertFalse(viewModel.isLoading)
-        XCTAssertNil(viewModel.totalMarketCap)
-        XCTAssertNil(viewModel.totalVolume)
+        // then
+        switch viewModel.state {
+        case .error(let message):
+            XCTAssertFalse(message.isEmpty)
+        default:
+            XCTFail("Expected .error state, but got \(viewModel.state)")
+        }
     }
     
+    // MARK: - Пустые данные
+    func test_loadGlobalData_setsEmptyStateWhenNoData() async {
+        // given
+        let mockRepo = MockCoinRepository()
+        mockRepo.globalData = GlobalMarketData(
+            totalMarketCap: [:],
+            totalVolume: [:],
+            marketCapChangePercentage24hUsd: 0
+        )
+        
+        let viewModel = GlobalMarketViewModel(repository: mockRepo)
+        
+        // when
+        await viewModel.loadGlobalData()
+        
+        // then
+        switch viewModel.state {
+        case .empty:
+            XCTAssertTrue(true)
+        default:
+            XCTFail("Expected .empty state, but got \(viewModel.state)")
+        }
+    }
 }
-
