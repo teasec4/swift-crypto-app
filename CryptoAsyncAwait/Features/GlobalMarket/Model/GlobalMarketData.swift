@@ -6,9 +6,9 @@
 //
 
 struct GlobalMarketData: Decodable {
-    let totalMarketCap: [String: Double]
-    let totalVolume: [String: Double]
-    let marketCapChangePercentage24hUsd: Double
+    let totalMarketCap: [String: Double]?
+    let totalVolume: [String: Double]?
+    let marketCapChangePercentage24hUsd: Double?
 
     enum CodingKeys: String, CodingKey {
            case totalMarketCap = "total_market_cap"

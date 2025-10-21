@@ -29,9 +29,9 @@ final class GlobalMarketViewModel: ObservableObject {
         
         do {
             let data = try await repository.getGlobalData()
-            totalMarketCap = data.totalMarketCap["usd"]
-            change24h = data.marketCapChangePercentage24hUsd
-            totalVolume = data.totalVolume["usd"]
+            self.totalMarketCap = data.totalMarketCap?["usd"] ?? 0.0
+            self.change24h = data.marketCapChangePercentage24hUsd ?? 0.0
+            self.totalVolume = data.totalVolume?["usd"] ?? 0.0
             print("✅ Global data loaded successfully")
         } catch {
             handleError(error)

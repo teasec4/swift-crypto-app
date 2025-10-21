@@ -56,7 +56,7 @@ final class MockCoinRepositoryTests: XCTestCase {
                 _ = try await mockRepo.getCoins(page: 1, limit: 10)
                 XCTFail("Expected an error to be thrown, but none was thrown.")
             } catch {
-                // Проверяем тип ошибки
+                // type of error
                 guard let urlError = error as? URLError else {
                     XCTFail("Expected URLError but got \(type(of: error))")
                     return

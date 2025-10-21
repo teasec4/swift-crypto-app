@@ -8,7 +8,7 @@ import XCTest
 import Foundation
 @testable import CryptoAsyncAwait
 
-final class MockGlobalRepositoryTests: XCTest{
+final class MockGlobalRepositoryTests: XCTestCase{
     func test_getChartData_returnExpectedData() async throws{
         // given
         let mockRepo = MockCoinRepository()

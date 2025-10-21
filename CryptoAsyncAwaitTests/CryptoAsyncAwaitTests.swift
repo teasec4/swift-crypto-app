@@ -23,6 +23,7 @@ final class MockCoinRepository: CoinRepositoryProtocol, ChartRepositoryProtocol 
         if shouldThrowError{
             throw URLError(.badServerResponse)
         }
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 
         return charData
     }
 }
