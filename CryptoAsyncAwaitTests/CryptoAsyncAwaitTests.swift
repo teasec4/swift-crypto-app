@@ -7,15 +7,23 @@
 import XCTest
 @testable import CryptoAsyncAwait
 
-final class MockCoinRepository: CoinRepositoryProtocol {
+final class MockCoinRepository: CoinRepositoryProtocol, ChartRepositoryProtocol {
     var shouldThrowError = false
     var coinsToReturn: [Coin] = []
+    var charData: [PricePoint] = []
 
     func getCoins(page: Int, limit: Int) async throws -> [Coin] {
         if shouldThrowError {
             throw URLError(.badServerResponse)
         }
         return coinsToReturn
+    }
+    
+    func getChartData(for coinID: String, days: Int) async throws -> [PricePoint] {
+        if shouldThrowError{
+            throw URLError(.badServerResponse)
+        }
+        return charData
     }
 }
 

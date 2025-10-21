@@ -6,7 +6,7 @@
 //
 import Foundation
 
-struct PricePoint: Identifiable, Equatable {
+struct PricePoint: Identifiable, Equatable, Decodable {
     let id = UUID()
     let date: Date
     let price: Double
