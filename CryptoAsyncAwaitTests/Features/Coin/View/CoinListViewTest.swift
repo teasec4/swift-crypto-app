@@ -18,7 +18,7 @@ final class CoinListViewTests: XCTestCase{
     func test_showsProgressViewWhenLoading() throws{
         // given
         let vm = CoinListViewModel()
-        vm.isLoading = true
+        vm.state = .loading
         
         let view = CoinListView(coinListViewModel: vm)
         ViewHosting.host(view: view)

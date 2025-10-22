@@ -15,7 +15,7 @@ final class MockCoinRepository: CoinRepositoryProtocol, ChartRepositoryProtocol,
 
     func getCoins(page: Int, limit: Int) async throws -> [Coin] {
         if shouldThrowError {
-            throw URLError(.badServerResponse)
+            throw CoinError.serverError
         }
         return coinsToReturn
     }

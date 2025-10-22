@@ -18,10 +18,7 @@ final class CoinListViewModel: ObservableObject {
         case content([Coin])
     }
     
-
     private let repository: CoinRepositoryProtocol
-    
-    
     init(repository: CoinRepositoryProtocol? = nil) {
         self.repository = repository ?? DependencyContainer.shared.coinRepository
     }
