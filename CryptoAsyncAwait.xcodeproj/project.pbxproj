@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		957AA3242EA7BA5C00D159EC /* ViewInspector in Frameworks */ = {isa = PBXBuildFile; productRef = 957AA3232EA7BA5C00D159EC /* ViewInspector */; };
+		957AA3412EA88FA000D159EC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 957AA3402EA88FA000D159EC /* Alamofire */; };
 		95D6BBBE2EA116EF00B5BEB9 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 95D6BBBD2EA116EF00B5BEB9 /* Auth */; };
 		95D6BBC02EA116EF00B5BEB9 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 95D6BBBF2EA116EF00B5BEB9 /* Storage */; };
 		95D6BBC22EA116EF00B5BEB9 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 95D6BBC12EA116EF00B5BEB9 /* Supabase */; };
@@ -28,9 +29,22 @@
 		95D6BBE42EA1D91300B5BEB9 /* CryptoAsyncAwait.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CryptoAsyncAwait.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		957AA33E2EA88D7A00D159EC /* Exceptions for "CryptoAsyncAwait" folder in "CryptoAsyncAwait" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 95D6BAF22EA115E100B5BEB9 /* CryptoAsyncAwait */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				957AA33E2EA88D7A00D159EC /* Exceptions for "CryptoAsyncAwait" folder in "CryptoAsyncAwait" target */,
+			);
 			path = CryptoAsyncAwait;
 			sourceTree = "<group>";
 		};
@@ -52,6 +66,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				95D6BBC02EA116EF00B5BEB9 /* Storage in Frameworks */,
+				957AA3412EA88FA000D159EC /* Alamofire in Frameworks */,
 				95D6BBBE2EA116EF00B5BEB9 /* Auth in Frameworks */,
 				95D6BBC22EA116EF00B5BEB9 /* Supabase in Frameworks */,
 			);
@@ -103,6 +118,7 @@
 				95D6BBBD2EA116EF00B5BEB9 /* Auth */,
 				95D6BBBF2EA116EF00B5BEB9 /* Storage */,
 				95D6BBC12EA116EF00B5BEB9 /* Supabase */,
+				957AA3402EA88FA000D159EC /* Alamofire */,
 			);
 			productName = CryptoAsyncAwait;
 			productReference = 95D6BBE42EA1D91300B5BEB9 /* CryptoAsyncAwait.app */;
@@ -163,6 +179,7 @@
 			packageReferences = (
 				95D6BBBC2EA116EF00B5BEB9 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				957AA3222EA7BA5C00D159EC /* XCRemoteSwiftPackageReference "ViewInspector" */,
+				957AA33F2EA88FA000D159EC /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 95D6BAEA2EA115E100B5BEB9;
@@ -349,6 +366,8 @@
 				DEVELOPMENT_TEAM = T9HUQXLFQ3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CryptoAsyncAwait/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -382,6 +401,8 @@
 				DEVELOPMENT_TEAM = T9HUQXLFQ3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CryptoAsyncAwait/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -490,6 +511,14 @@
 				minimumVersion = 0.10.3;
 			};
 		};
+		957AA33F2EA88FA000D159EC /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
 		95D6BBBC2EA116EF00B5BEB9 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase-community/supabase-swift.git";
@@ -505,6 +534,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 957AA3222EA7BA5C00D159EC /* XCRemoteSwiftPackageReference "ViewInspector" */;
 			productName = ViewInspector;
+		};
+		957AA3402EA88FA000D159EC /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 957AA33F2EA88FA000D159EC /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 		95D6BBBD2EA116EF00B5BEB9 /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;

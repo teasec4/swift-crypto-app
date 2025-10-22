@@ -15,15 +15,48 @@ final class SupabaseManager {
     let client: SupabaseClient
 
     private init() {
-        // Validate the Supabase URL instead of force-unwrapping it.
-        guard let url = URL(string: "https://iccnpikverganvbqgwfk.supabase.co") else {
-            preconditionFailure("Invalid Supabase URL - configure Supabase URL in a safe place")
+        // MARK: - Load configuration safely
+        guard
+            let urlString = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
+            let key = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_KEY") as? String,
+            let url = URL(string: urlString)
+        else {
+            fatalError("❌ Supabase configuration missing or invalid in Info.plist")
         }
+        
+        // MARK: - Initialize client
+                client = SupabaseClient(
+                    supabaseURL: url,
+                    supabaseKey: key
+                )
+        
+        Task {
+                    await recoverSessionIfNeeded()
+                }
+    }
+}
 
-        // NOTE: Consider moving the key out of source control and into secure storage or configuration.
-        client = SupabaseClient(
-            supabaseURL: url,
-            supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljY25waWt2ZXJnYW52YnFnd2ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxMzczMTYsImV4cCI6MjA3NTcxMzMxNn0.SwxhnABDW9OiNcsLXnxXObiQ418Z4yLaXI4T00g9c8E"
-        )
+
+// MARK: - Helpers
+extension SupabaseManager {
+
+    /// Attempts to restore the previous user session if available
+    func recoverSessionIfNeeded() async {
+        do {
+            let session = try await client.auth.session
+            print("✅ Supabase session restored for user:", session.user.email ?? "unknown")
+        } catch {
+            print("ℹ️ No active Supabase session found or recovery failed:", error.localizedDescription)
+        }
+    }
+
+    /// Log out and clear session
+    func signOut() async {
+        do {
+            try await client.auth.signOut()
+            print("👋 Signed out successfully")
+        } catch {
+            print("⚠️ Sign-out error:", error.localizedDescription)
+        }
     }
 }
