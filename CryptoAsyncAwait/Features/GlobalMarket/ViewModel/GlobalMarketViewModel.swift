@@ -18,8 +18,6 @@ final class GlobalMarketViewModel: ObservableObject {
         case content(GlobalMarketData)
     }
     
-    private var isLoading: Bool = false
-    private var errorMessage: String = ""
     
     private let repository: GlobalRepositoryProtocol
     
@@ -29,8 +27,7 @@ final class GlobalMarketViewModel: ObservableObject {
     
     
     func loadGlobalData() async {
-        isLoading = true
-        defer { isLoading = false }
+        state = .loading
 
         do {
             let data = try await repository.getGlobalData()
@@ -43,5 +40,4 @@ final class GlobalMarketViewModel: ObservableObject {
             state = .error(error.localizedDescription)
         }
     }
-    
 }

@@ -19,7 +19,7 @@ struct CoinsPage: View {
                 GlobalMarketHeaderView(viewModel: globalMarketViewModel)
                 CoinListView(coinListViewModel: coinListViewModel)
             }
-            .contentLoading(isVisible: $coinListViewModel.isLoading)
+            
         
     }
 }

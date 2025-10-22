@@ -13,30 +13,19 @@ struct CoinListView: View {
     var body: some View {
         bodyContent
             .task {
-                if !coinListViewModel.hasLoadedInitially {
-                    await coinListViewModel.loadCoins()
-                }
+                await coinListViewModel.loadCoins()
             }
     }
     
     @ViewBuilder
     private var bodyContent: some View{
-        switch coinListViewModel.screenState {
+        switch coinListViewModel.state {
         case .loading:
             ProgressView()
         case .error(let error):
-            VStack(spacing: 16) {
-                Text("❌ \(error)")
-                    .foregroundColor(.red)
-                Button("Retry") {
-                    Task { await coinListViewModel.loadCoins() }
-                }
-            }
-            .padding()
+            CoinErrorView(message: error, retryAction: coinListViewModel.reloadTask)
         case .empty:
-            VStack{
-                Text("No data")
-            }
+            CoinEmptyView(retryAction: coinListViewModel.reloadTask)
         case .content(let coins):
             List(coins, id: \.id) { coin in
                 NavigationLink(destination: CoinDetailView(coin: coin)) {

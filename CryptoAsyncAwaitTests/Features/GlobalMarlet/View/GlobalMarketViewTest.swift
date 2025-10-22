@@ -4,7 +4,6 @@
 //
 //  Created by Максим Ковалев on 10/21/25.
 //
-
 import XCTest
 import SwiftUI
 import ViewInspector

@@ -19,7 +19,22 @@ final class CoinRepository: CoinRepositoryProtocol {
     }
     
     func getCoins(page: Int, limit: Int) async throws -> [Coin] {
-        try await api.fetchCoins(page: page, limit: limit)
+        do {
+            return try await api.fetchCoins(page: page, limit: limit)
+        } catch let urlError as URLError {
+            switch urlError.code {
+            case .badURL:
+                throw CoinError.invalidURL
+            case .badServerResponse:
+                throw CoinError.serverError
+            default:
+                throw CoinError.unkown(urlError)
+            }
+        } catch let decodingError as DecodingError {
+            throw CoinError.invalidData
+        } catch {
+            throw CoinError.unkown(error)
+        }
     }
     
 }
