@@ -31,15 +31,40 @@ struct CoinListView: View {
         case .empty:
             CoinEmptyView(retryAction: coinListViewModel.reloadTask)
         case .content(let coins):
-            List(coins, id: \.id) { coin in
-                NavigationLink(destination: CoinDetailView(coin: coin)) {
-                    CoinRowView(coin: coin)
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(coins, id: \.id) { coin in
+                        VStack(spacing: 0) {
+                            NavigationLink(destination: CoinDetailView(coin: coin)) {
+                                CoinRowView(coin: coin)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 12)
+                                    .contentShape(Rectangle())
+                                    .background(Color(.systemBackground))
+                            }
+                            .buttonStyle(.plain)
+                            
+
+                            Divider()
+                                .padding(.leading, 52)
+                                .padding(.trailing, 8)
+                                .opacity(0.3)
+                        }
+                        .task{
+                            await coinListViewModel.loadMoreIfNeeded(currentCoin: coin)
+                        }
+                    }
                 }
-            }
-            .scrollContentBackground(.hidden)
-            .listStyle(.plain)
-            .refreshable {
-                await coinListViewModel.loadCoins()
+                .background(Color(.systemGroupedBackground))
+                
+                if coinListViewModel.isLoadingMore {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .padding()
+                        Spacer()
+                    }
+                }
             }
             
         }
