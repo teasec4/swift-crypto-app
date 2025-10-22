@@ -16,14 +16,14 @@ struct CustomTabBar: View {
         HStack {
             ForEach(icons.indices, id: \.self) { index in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.25)) {
+                    withAnimation(.easeInOut(duration: 0.15)) {
                         selected = index
                     }
                     let generator = UIImpactFeedbackGenerator(style: .light)
                     generator.prepare()
                     generator.impactOccurred()
                 } label: {
-                    VStack(spacing: 4) {
+                    VStack(spacing: 2) {
                         Image(systemName: icons[index])
                             .font(.system(size: 22, weight: .semibold))
                             .foregroundStyle(selected == index ? Color.black : .gray)
@@ -37,9 +37,9 @@ struct CustomTabBar: View {
                 }
             }
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 10)
-        .padding(.bottom, 6)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 6)
+        .frame(height: 52)
         .frame(maxWidth: .infinity)
         .background(
             LinearGradient(
@@ -58,7 +58,7 @@ struct CustomTabBar: View {
                 .frame(maxHeight: .infinity, alignment: .top)
             , alignment: .top
         )
-        .ignoresSafeArea(edges: .bottom) // 🔹 важное место
+        .ignoresSafeArea(edges: .bottom) 
     }
 }
 

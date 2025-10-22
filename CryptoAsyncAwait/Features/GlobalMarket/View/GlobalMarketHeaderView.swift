@@ -20,19 +20,11 @@ struct GlobalMarketHeaderView: View {
     private var bodyContent: some View {
         switch viewModel.state {
         case .loading:
-            ProgressView()
-                .tint(.gray)
+            GlobalMarketSkeletonView()
 
         case .error(let error):
-            VStack(spacing: 16) {
-                Text("❌ \(error)")
-                    .foregroundColor(.red)
-                Button("Retry") {
-                    Task { await viewModel.loadGlobalData() }
-                }
-            }
-            .padding()
-
+            EmptyView()
+    
         case .empty:
             Text("No data available")
                 .foregroundColor(.gray)

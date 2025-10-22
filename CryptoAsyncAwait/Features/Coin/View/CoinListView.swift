@@ -21,7 +21,11 @@ struct CoinListView: View {
     private var bodyContent: some View{
         switch coinListViewModel.state {
         case .loading:
-            ProgressView()
+            VStack(spacing: 8) {
+                    ForEach(0..<14, id: \.self) { _ in
+                        CoinRowSkeletonView()
+                    }
+                }
         case .error(let error):
             CoinErrorView(message: error, retryAction: coinListViewModel.reloadTask)
         case .empty:

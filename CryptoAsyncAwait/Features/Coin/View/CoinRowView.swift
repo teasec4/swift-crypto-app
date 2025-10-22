@@ -6,64 +6,57 @@
 //
 import SwiftUI
 
+import SwiftUI
+
 struct CoinRowView: View {
     let coin: Coin
     
     var body: some View {
-        // compute derived values safely
         let marketCapText = coin.marketCapRank.map { "\($0)" } ?? "-"
         let change = coin.priceChangePercentage24H ?? 0
         let changeText = coin.priceChangePercentage24H.map { $0.toPercentString() } ?? "-"
         
-        return HStack {
+        HStack(spacing: 8) { // 🔹 меньше горизонтальных зазоров
             // Market cap rank
             Text(marketCapText)
-                .font(.caption)
+                .font(.system(size: 10, weight: .medium))
                 .foregroundColor(.gray)
+                .frame(width: 20, alignment: .leading)
             
             // Image
             AsyncImage(url: coin.imageUrl) { image in
                 image
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 32, height: 32)
-                    .foregroundColor(.orange)
+                    .frame(width: 20, height: 20) // 🔹 чуть больше, чтобы не терялась детализация
             } placeholder: {
                 Circle()
-                    .frame(width: 32, height: 32)
-                    .background(Color(.systemGray5))
+                    .fill(Color(.systemGray5))
+                    .frame(width: 20, height: 20)
             }
             
-            // Coin name info
-            VStack(alignment: .leading, spacing: 4) {
+            // Name + symbol
+            VStack(alignment: .leading, spacing: 2) { // 🔹 меньше вертикальных отступов
                 Text(coin.name)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .padding(.leading, 4)
-                
+                    .font(.system(size: 13, weight: .semibold))
                 Text(coin.symbol.uppercased())
-                    .font(.caption)
-                    .padding(.leading, 6)
+                    .font(.system(size: 10))
+                    .foregroundColor(.gray)
             }
-            .padding(.leading, 2)
+            .frame(maxWidth: .infinity, alignment: .leading)
             
-            Spacer()
-            
-            // Coin price info
-            VStack(alignment: .trailing, spacing: 4) {
+            // Price + change
+            VStack(alignment: .trailing, spacing: 2) {
                 Text(coin.currentPrice.toCurrency())
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .padding(.leading, 4)
-                
+                    .font(.system(size: 13, weight: .semibold))
                 Text(changeText)
-                    .font(.caption)
-                    .padding(.leading, 6)
-                    .foregroundColor(change > 0 ? .green : (change < 0 ? .red : .primary))
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(change > 0 ? .green : (change < 0 ? .red : .gray))
             }
-            .padding(.leading, 2)
+            .frame(alignment: .trailing)
         }
-        .padding(.horizontal)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 3) // 🔹 меньше высоты ряда
+        .contentShape(Rectangle()) // 🔹 для удобного нажатия по всей ширине
     }
 }
