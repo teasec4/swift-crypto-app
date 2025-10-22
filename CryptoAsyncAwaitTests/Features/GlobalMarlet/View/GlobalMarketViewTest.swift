@@ -14,13 +14,24 @@ extension GlobalMarketHeaderView: Inspectable {}
 @MainActor
 final class GlobalMarketViewTests: XCTestCase {
     
+    var viewModel: GlobalMarketViewModel!
+    
+    override func setUp(){
+        super.setUp()
+        viewModel = GlobalMarketViewModel()
+    }
+    
+    override func tearDown() {
+        viewModel = nil
+        super.tearDown()
+    }
+    
     // MARK: - 1️⃣ Loading state
     func test_showsProgressViewWhenLoading() throws {
         // given
-        let vm = GlobalMarketViewModel()
-        vm.state = .loading
+        viewModel.state = .loading
         
-        let view = GlobalMarketHeaderView(viewModel: vm, disableAutoLoad: true)
+        let view = GlobalMarketHeaderView(viewModel: viewModel, disableAutoLoad: true)
         ViewHosting.host(view: view)
         
         // when / then
@@ -32,10 +43,9 @@ final class GlobalMarketViewTests: XCTestCase {
     // MARK: - 2️⃣ Error state
     func test_showsErrorMessageWhenErrorExists() throws {
         // given
-        let vm = GlobalMarketViewModel()
-        vm.state = .error("Network error")
+        viewModel.state = .error("Network error")
         
-        let view = GlobalMarketHeaderView(viewModel: vm, disableAutoLoad: true)
+        let view = GlobalMarketHeaderView(viewModel: viewModel, disableAutoLoad: true)
         ViewHosting.host(view: view)
         
         // when

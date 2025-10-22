@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum CoinError: Error, LocalizedError {
+enum CoinError: Error, LocalizedError, Equatable {
     case invalidURL
     case serverError
     case invalidData
@@ -25,4 +25,18 @@ enum CoinError: Error, LocalizedError {
             return error.localizedDescription
         }
     }
+    
+    static func == (lhs: CoinError, rhs: CoinError) -> Bool {
+            switch (lhs, rhs) {
+            case (.invalidURL, .invalidURL),
+                 (.serverError, .serverError),
+                 (.invalidData, .invalidData):
+                return true
+            case (.unkown, .unkown):
+                return true
+            default:
+                return false
+            }
+        }
+    
 }

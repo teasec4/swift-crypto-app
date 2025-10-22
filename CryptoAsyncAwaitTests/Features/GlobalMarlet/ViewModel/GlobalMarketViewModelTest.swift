@@ -11,17 +11,29 @@ import XCTest
 @MainActor
 final class GlobalMarketViewModelTests: XCTestCase {
     
-    // MARK: - Успешная загрузка
+    var viewModel: GlobalMarketViewModel!
+    var mockRepo: MockCoinRepository!
+    
+    override func setUp(){
+        super.setUp()
+        mockRepo = MockCoinRepository()
+        viewModel = GlobalMarketViewModel(repository: mockRepo)
+    }
+    
+    override func tearDown() {
+        viewModel = nil
+        mockRepo = nil
+        super.tearDown()
+    }
+    
+    // MARK:
     func test_loadGlobalData_successfullyUpdatesStateToContent() async throws {
         // given
-        let mockRepo = MockCoinRepository()
         mockRepo.globalData = GlobalMarketData(
             totalMarketCap: ["usd": 1_234_567_890],
             totalVolume: ["usd": 987_654_321],
             marketCapChangePercentage24hUsd: 2.5
         )
-        
-        let viewModel = GlobalMarketViewModel(repository: mockRepo)
         
         // when
         await viewModel.loadGlobalData()
@@ -40,10 +52,7 @@ final class GlobalMarketViewModelTests: XCTestCase {
     // MARK: - Ошибка загрузки
     func test_loadGlobalData_setsErrorStateOnFailure() async {
         // given
-        let mockRepo = MockCoinRepository()
         mockRepo.shouldThrowError = true
-        
-        let viewModel = GlobalMarketViewModel(repository: mockRepo)
         
         // when
         await viewModel.loadGlobalData()
@@ -60,14 +69,11 @@ final class GlobalMarketViewModelTests: XCTestCase {
     // MARK: - Пустые данные
     func test_loadGlobalData_setsEmptyStateWhenNoData() async {
         // given
-        let mockRepo = MockCoinRepository()
         mockRepo.globalData = GlobalMarketData(
             totalMarketCap: [:],
             totalVolume: [:],
             marketCapChangePercentage24hUsd: 0
         )
-        
-        let viewModel = GlobalMarketViewModel(repository: mockRepo)
         
         // when
         await viewModel.loadGlobalData()

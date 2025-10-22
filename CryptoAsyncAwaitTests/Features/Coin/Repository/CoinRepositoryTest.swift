@@ -1,39 +1,31 @@
 //
-//  CoinRepositoryTest.swift
-//  CryptoAsyncAwait
+//  CoinRepositoryTests.swift
+//  CryptoAsyncAwaitTests
 //
 //  Created by Максим Ковалев on 10/16/25.
 //
 import XCTest
 @testable import CryptoAsyncAwait
 
-final class MockCoinRepositoryTests: XCTestCase {
+@MainActor
+final class CoinRepositoryTests: XCTestCase {
 
+    var mockRepo: MockCoinRepository!
+
+    override func setUp() {
+        super.setUp()
+        mockRepo = MockCoinRepository()
+    }
+
+    override func tearDown() {
+        mockRepo = nil
+        super.tearDown()
+    }
+
+    // MARK: ✅ Success case
     func test_getCoins_returnsExpectedCoins() async throws {
         // given
-        let mockRepo = MockCoinRepository()
-        mockRepo.coinsToReturn = [
-            Coin(
-                id: "btc",
-                symbol: "btc",
-                name: "Bitcoin",
-                image: "https://example.com/btc.png",
-                currentPrice: 65000,
-                marketCapRank: 1,
-                priceChange24H: 1200,
-                priceChangePercentage24H: 1.8
-            ),
-            Coin(
-                id: "eth",
-                symbol: "eth",
-                name: "Ethereum",
-                image: "https://example.com/eth.png",
-                currentPrice: 3500,
-                marketCapRank: 2,
-                priceChange24H: -150,
-                priceChangePercentage24H: -2.1
-            )
-        ]
+        mockRepo.coinsToReturn = [.mockBTC, .mockETH]
 
         // when
         let coins = try await mockRepo.getCoins(page: 1, limit: 2)
@@ -41,27 +33,25 @@ final class MockCoinRepositoryTests: XCTestCase {
         // then
         XCTAssertEqual(coins.count, 2)
         XCTAssertEqual(coins.first?.id, "btc")
-        XCTAssertEqual(coins.last?.name, "Ethereum")
+        XCTAssertEqual(coins.last?.id, "eth")
         XCTAssertEqual(coins[0].currentPrice, 65000)
-        XCTAssertEqual(coins[1].priceChangePercentage24H, -2.1)
+        XCTAssertEqual(coins[1].currentPrice, 3500)
     }
 
-    func test_getCoins_throwsErrorWhenFlagSet() async {
+    // MARK: ❌ Error case
+    func test_getCoins_throwsCoinErrorWhenFlagSet() async {
         // given
-        let mockRepo = MockCoinRepository()
         mockRepo.shouldThrowError = true
 
         // when / then
-            do {
-                _ = try await mockRepo.getCoins(page: 1, limit: 10)
-                XCTFail("Expected an error to be thrown, but none was thrown.")
-            } catch {
-                // type of error
-                guard let urlError = error as? URLError else {
-                    XCTFail("Expected URLError but got \(type(of: error))")
-                    return
-                }
-                XCTAssertEqual(urlError.code, .badServerResponse)
-            }
+        do {
+            _ = try await mockRepo.getCoins(page: 1, limit: 10)
+            XCTFail("Expected CoinError.serverError, but none was thrown.")
+        } catch let error as CoinError {
+            XCTAssertEqual(error, .serverError)
+            XCTAssertEqual(error.errorDescription, "There was an error with the server. Please try again later")
+        } catch {
+            XCTFail("Expected CoinError, got \(type(of: error))")
+        }
     }
 }

@@ -9,13 +9,25 @@ import XCTest
 
 @MainActor
 final class CoinListViewModelTests: XCTestCase{
+    
+    var mockRepo: MockCoinRepository!
+    var viewModel: CoinListViewModel!
+    
+    override func setUp() {
+        super.setUp()
+        mockRepo = MockCoinRepository()
+        viewModel = CoinListViewModel(repository: mockRepo)
+    }
+    
+    override func tearDown() {
+            mockRepo = nil
+            viewModel = nil
+            super.tearDown()
+    }
+    
     func test_fetchCoins_successfullyUpdatesState() async throws{
         // given
-        let mockRepo = MockCoinRepository()
-        mockRepo.coinsToReturn = [
-                    Coin(id: "btc", symbol: "BTC", name: "Bitcoin", image: "", currentPrice: 65000, marketCapRank: 1, priceChange24H: 1000, priceChangePercentage24H: 1.8)
-                ]
-        let viewModel = CoinListViewModel(repository: mockRepo)
+        mockRepo.coinsToReturn = [Coin.mockBTC]
          
         // when
         await viewModel.loadCoins()
@@ -31,51 +43,29 @@ final class CoinListViewModelTests: XCTestCase{
     }
     
     // MARK: - Empty case
-        func test_loadCoins_setsEmptyState_whenNoCoinsReturned() async {
-            // given
-            let mockRepo = MockCoinRepository()
+    func test_loadCoins_empty() async {
             mockRepo.coinsToReturn = []
-            let viewModel = CoinListViewModel(repository: mockRepo)
-            
-            // when
             await viewModel.loadCoins()
-            
-            // then
-            switch viewModel.state {
-            case .empty:
-                XCTAssertTrue(true)
-            default:
-                XCTFail("Expected .empty state, got \(viewModel.state)")
+            if case .empty = viewModel.state {} else {
+                XCTFail("Expected .empty state")
             }
         }
     
     // MARK: - Error case
-       func test_loadCoins_handlesCoinErrorProperly() async {
-           // given
-           let mockRepo = MockCoinRepository()
-           mockRepo.shouldThrowError = true
-           let viewModel = CoinListViewModel(repository: mockRepo)
-           
-           // when
-           await viewModel.loadCoins()
-           
-           // then
-           switch viewModel.state {
-           case .error(let message):
-               XCTAssertEqual(message, "There was an error with the server. Please try again later")
-           default:
-               XCTFail("Expected .error state, got \(viewModel.state)")
-           }
-       }
+    func test_loadCoins_error() async {
+            mockRepo.shouldThrowError = true
+            await viewModel.loadCoins()
+            if case .error(let msg) = viewModel.state {
+                XCTAssertEqual(msg, "There was an error with the server. Please try again later")
+            } else {
+                XCTFail("Expected .error state")
+            }
+        }
     
     // MARK: - ReloadTask wrapper
         func test_reloadTask_callsLoadCoins() async {
             // given
-            let mockRepo = MockCoinRepository()
-            mockRepo.coinsToReturn = [
-                Coin(id: "eth", symbol: "ETH", name: "Ethereum", image: "", currentPrice: 3500, marketCapRank: 2, priceChange24H: -100, priceChangePercentage24H: -2.5)
-            ]
-            let viewModel = CoinListViewModel(repository: mockRepo)
+            mockRepo.coinsToReturn = [Coin.mockBTC]
             
             // when
             viewModel.reloadTask()
@@ -84,7 +74,7 @@ final class CoinListViewModelTests: XCTestCase{
             // then
             switch viewModel.state {
             case .content(let coins):
-                XCTAssertEqual(coins.first?.symbol, "ETH")
+                XCTAssertEqual(coins.first?.symbol, "BTC")
             default:
                 XCTFail("Expected .content state after reloadTask()")
             }

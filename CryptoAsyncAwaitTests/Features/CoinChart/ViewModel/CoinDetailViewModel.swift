@@ -9,19 +9,35 @@ import XCTest
 
 @MainActor
 final class CoinDetailViewModelTests: XCTestCase{
+    
+    var mockRepo: MockCoinRepository!
+    var viewModel: CoinDetailViewModel!
+    var now: Date!
+    
+    override func setUp(){
+        super.setUp()
+        mockRepo = MockCoinRepository()
+        viewModel  = CoinDetailViewModel(repository: mockRepo)
+        now = Date()
+    }
+    
+    override func tearDown() {
+        mockRepo = nil
+        viewModel = nil
+        super.tearDown()
+    }
+    
     func test_fetchChartData_successfulLoad_updatesChartData() async throws{
         // given
-        let mockRepo = MockCoinRepository()
-        let now = Date()
+
         mockRepo.charData = [
             PricePoint(date: now.addingTimeInterval(-3600), price: 65000.0),
             PricePoint(date: now, price: 65500.0)
         ]
         
-        let viewModel = CoinDetailViewModel(repository: mockRepo)
-        
         // when
         await viewModel.fetchChartData(for: "btc", days: 1)
+        
         // then
         XCTAssertFalse(viewModel.isLoading, "isLoading should be false after load")
         XCTAssertTrue(viewModel.errorMessage == nil, "errorMessage should be nil on success")
@@ -32,10 +48,7 @@ final class CoinDetailViewModelTests: XCTestCase{
     
     func test_fetchChartData_failure_setsErrorMessage() async {
             // given
-            let mockRepo = MockCoinRepository()
             mockRepo.shouldThrowError = true
-            
-            let viewModel = CoinDetailViewModel(repository: mockRepo)
             
             // when
             await viewModel.fetchChartData(for: "btc", days: 7)
