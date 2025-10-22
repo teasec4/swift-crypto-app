@@ -28,7 +28,7 @@ struct CoinRowView: View {
                 image
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 20, height: 20) // 🔹 чуть больше, чтобы не терялась детализация
+                    .frame(width: 20, height: 20)
             } placeholder: {
                 Circle()
                     .fill(Color(.systemGray5))
@@ -36,7 +36,7 @@ struct CoinRowView: View {
             }
             
             // Name + symbol
-            VStack(alignment: .leading, spacing: 2) { // 🔹 меньше вертикальных отступов
+            VStack(alignment: .leading, spacing: 2) {
                 Text(coin.name)
                     .font(.system(size: 13, weight: .semibold))
                 Text(coin.symbol.uppercased())
