@@ -2,9 +2,7 @@
 //  CoinRowView.swift
 //  CryptoAsyncAwait
 //
-//  Created by Stephan Dowless on 1/5/23.
-//
-import SwiftUI
+
 
 import SwiftUI
 
@@ -16,7 +14,7 @@ struct CoinRowView: View {
         let change = coin.priceChangePercentage24H ?? 0
         let changeText = coin.priceChangePercentage24H.map { $0.toPercentString() } ?? "-"
         
-        HStack(spacing: 8) { // 🔹 меньше горизонтальных зазоров
+        HStack(spacing: 8) {
             // Market cap rank
             Text(marketCapText)
                 .font(.system(size: 10, weight: .medium))
@@ -56,7 +54,7 @@ struct CoinRowView: View {
             .frame(alignment: .trailing)
         }
         .padding(.horizontal, 10)
-        .padding(.vertical, 3) // 🔹 меньше высоты ряда
-        .contentShape(Rectangle()) // 🔹 для удобного нажатия по всей ширине
+        .padding(.vertical, 3) 
+        .contentShape(Rectangle())
     }
 }

@@ -5,11 +5,6 @@
 //  Created by Максим Ковалев on 10/2/25.
 //
 
-//
-//  CoinDetailView.swift
-//  CryptoAsyncAwait
-//
-
 import SwiftUI
 
 struct CoinDetailView: View {
