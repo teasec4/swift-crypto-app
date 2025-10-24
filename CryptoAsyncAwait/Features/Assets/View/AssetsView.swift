@@ -26,7 +26,7 @@ struct AssetsView: View{
                     }
                 }
                 HStack{
-                    Text("$456,80")
+                    Text(assetsViewModel.totalValueUSD.toCurrency())
                         .font(.headline)
                     Text("USD")
                         .foregroundStyle(.secondary)
@@ -36,27 +36,10 @@ struct AssetsView: View{
                     Text("+$5,81 (1,49%)")
                         .foregroundColor(.green)
                 }
-                HStack(spacing: 10){
-                    
-                    ForEach(0..<4) { _ in
-                            VStack(spacing: 10) {
-                                ZStack {
-                                    Circle()
-                                        .foregroundColor(.blue)
-                                    Image(systemName: "exclamationmark.arrow.trianglehead.counterclockwise.rotate.90")
-                                        .foregroundStyle(.white)
-                                }
-                                .frame(width: 50, height: 50)
-                                
-                                Text("Add Funds")
-                            }
-                        }
-                   
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.vertical, 20)
                 
             }
+            .padding()
+            
             List {
                 ForEach(assetsViewModel.assets) { asset in
                         UserAssetRowView(asset: asset)
@@ -64,7 +47,7 @@ struct AssetsView: View{
             }
             .listStyle(.plain)
         }
-        .padding()
+        
         .toolbar{
             ToolbarItem(placement:.primaryAction){
                 Button{

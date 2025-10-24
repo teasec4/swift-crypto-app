@@ -60,10 +60,12 @@ final class CoinListViewModel: ObservableObject {
     func loadCoinsForSearch() async {
         guard allCoinsCache.isEmpty else { return }
         isLoadingSearch = true
+        allCoinsLoadingErrorMessage = nil
         defer { isLoadingSearch = false }
         do {
             let coins = try await repository.getTopCoins(limit: 500)
             allCoinsCache = coins
+            allCoinsLoadingErrorMessage = nil
         } catch {
             allCoinsLoadingErrorMessage = error.localizedDescription
         }

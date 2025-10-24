@@ -37,4 +37,9 @@ final class AssetsViewModel: ObservableObject{
     func removeAsset(at offsets: IndexSet) {
         assets.remove(atOffsets: offsets)
     }
+    
+    // MARK: - Computed total value
+        var totalValueUSD: Double {
+            assets.reduce(0) { $0 + $1.coin.currentPrice * $1.amount }
+        }
 }
