@@ -9,8 +9,8 @@ import Supabase
 
 
 @MainActor
-final class SupabaseManager {
-    static let shared = SupabaseManager()
+final class SupabaseService {
+    static let shared = SupabaseService()
 
     let client: SupabaseClient
 
@@ -38,7 +38,7 @@ final class SupabaseManager {
 
 
 // MARK: - Helpers
-extension SupabaseManager {
+extension SupabaseService {
 
     /// Attempts to restore the previous user session if available
     func recoverSessionIfNeeded() async {
