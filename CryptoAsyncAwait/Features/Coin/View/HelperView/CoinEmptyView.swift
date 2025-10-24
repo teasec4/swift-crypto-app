@@ -13,7 +13,6 @@ struct CoinEmptyView: View {
     var body: some View {
         VStack(spacing: 20) {
             Spacer()
-
             ZStack {
                 Circle()
                     .fill(

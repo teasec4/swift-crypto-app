@@ -10,7 +10,6 @@ import SwiftData
 
 @main
 struct CryptoAsyncAwaitApp: App {
-    
     @StateObject private var authVM = AuthViewModel()
     
     var body: some Scene {

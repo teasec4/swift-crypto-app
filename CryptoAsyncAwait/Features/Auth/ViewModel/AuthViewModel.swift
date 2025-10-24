@@ -15,7 +15,7 @@ final class AuthViewModel: ObservableObject {
     @Published var errorMessage: String?
     var lastAuthUpdate: Date?
     
-    private let client = SupabaseManager.shared.client
+    private let client = SupabaseService.shared.client
     private var authTask: Task<Void, Never>?
     
     init() {

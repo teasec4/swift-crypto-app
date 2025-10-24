@@ -5,7 +5,9 @@
 //  Created by Максим Ковалев on 10/15/25.
 //
 final class DependencyContainer {
+    // singltone
     static let shared = DependencyContainer()
+    
     private let coinAPI: CoinAPI
     
     let coinRepository: CoinRepositoryProtocol

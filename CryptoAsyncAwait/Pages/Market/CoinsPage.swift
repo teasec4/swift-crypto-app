@@ -8,20 +8,31 @@
 import SwiftUI
 
 struct CoinsPage: View {
+    @ObservedObject var globalMarketViewModel: GlobalMarketViewModel
+    @ObservedObject var coinListViewModel: CoinListViewModel
+    @ObservedObject var assetsViewModel: AssetsViewModel
     
-    @StateObject private var globalMarketViewModel = GlobalMarketViewModel()
-    @StateObject private var coinListViewModel = CoinListViewModel()
-    
+    @State private var isOpenSheet: Bool = false
     
     var body: some View {
-
             VStack{
                 GlobalMarketHeaderView(viewModel: globalMarketViewModel)
                 CoinListView(coinListViewModel: coinListViewModel)
             }
-            
-        
+            .toolbar{
+                ToolbarItem(placement:.primaryAction){
+                    Button{
+                        isOpenSheet = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .fullScreenCover(isPresented:$isOpenSheet){
+                FullScreenCoverAddAssetsView(coinListViewModel:coinListViewModel, assetsViewModel: assetsViewModel)
+            }
     }
+    
 }
 
 
