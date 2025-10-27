@@ -13,30 +13,55 @@ final class AssetsViewModel: ObservableObject{
     @Published var selectedCoin: Coin? = nil
     @Published var inputAmount: String = ""
     @Published var showAddSheet = false
+    @Published var formMode: AssetFormMode? = nil
+    
+    enum AssetFormMode {
+        case add
+        case edit(UserAsset)
+    }
     
     func selectCoin(_ coin: Coin) {
         selectedCoin = coin
         inputAmount = ""
+        formMode = .add
         showAddSheet = true
     }
     
-    func addAsset() {
+    func editAsset(_ asset: UserAsset) {
+        selectedCoin = asset.coin
+        inputAmount = String(asset.amount)
+        formMode = .edit(asset)
+        showAddSheet = true
+    }
+    
+    func saveAsset() {
         guard let coin = selectedCoin,
               let amount = Double(inputAmount), amount > 0 else { return }
         
        
-        if let index = assets.firstIndex(where: { $0.coin.id == coin.id }) {
-            assets[index].amount += amount
-        } else {
-            assets.append(UserAsset(coin: coin, amount: amount))
-        }
+        switch formMode {
+            case .add:
+                if let index = assets.firstIndex(where: { $0.coin.id == coin.id }) {
+                    assets[index].amount += amount
+                } else {
+                    assets.append(UserAsset(coin: coin, amount: amount))
+                }
+            case .edit(let existingAsset):
+                if let index = assets.firstIndex(where: { $0.id == existingAsset.id }) {
+                    assets[index].amount = amount
+                }
+            case .none:
+                return
+            }
+        
         showAddSheet = false
         selectedCoin = nil
+        formMode = nil
     }
     
-    func removeAsset(at offsets: IndexSet) {
-        assets.remove(atOffsets: offsets)
-    }
+    func removeAsset(withId id: UUID) {
+            assets.removeAll { $0.id == id }
+        }
     
     // MARK: - Computed total value
         var totalValueUSD: Double {

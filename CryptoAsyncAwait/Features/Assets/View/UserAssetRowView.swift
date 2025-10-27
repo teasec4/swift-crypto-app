@@ -13,7 +13,7 @@ struct UserAssetRowView: View {
         let totalValue = asset.coin.currentPrice * asset.amount
         
         HStack(spacing: 8) {
-            // Иконка монеты
+            // coin img
             AsyncImage(url: asset.coin.imageUrl) { image in
                 image
                     .resizable()
@@ -25,7 +25,7 @@ struct UserAssetRowView: View {
                     .frame(width: 24, height: 24)
             }
             
-            // Название и символ
+           // coin lable
             VStack(alignment: .leading, spacing: 2) {
                 Text(asset.coin.name)
                     .font(.system(size: 13, weight: .semibold))
@@ -35,17 +35,18 @@ struct UserAssetRowView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             
-            // Количество и пересчёт
+            // amount and totalValue
             VStack(alignment: .trailing, spacing: 2) {
-                Text("\(asset.amount, specifier: "%.4f")")
-                    .font(.system(size: 13, weight: .semibold))
                 Text(totalValue.toCurrency())
+                    .font(.system(size: 13, weight: .semibold))
+                    
+                
+                Text("\(asset.amount, specifier: "%.4f")")
                     .font(.system(size: 10))
                     .foregroundColor(.gray)
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 4)
+        
         .contentShape(Rectangle())
     }
 }

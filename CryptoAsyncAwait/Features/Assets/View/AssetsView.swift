@@ -11,18 +11,21 @@ struct AssetsView: View{
     @State private var isOpenSheet: Bool = false
     @ObservedObject var assetsViewModel: AssetsViewModel
     
+    @State private var showDeleteAlert = false
+    @State private var assetToDelete: UserAsset?
+    
     var body: some View{
         VStack(alignment:.leading, spacing: 16){
             VStack(alignment:.leading, spacing: 16){
                 HStack{
                     Text("Total Assets")
                         .foregroundStyle(.secondary)
-                        
+                    
                     Button{
                         
                     } label: {
                         Image(systemName: "eye.slash")
-                            
+                        
                     }
                 }
                 HStack{
@@ -42,10 +45,52 @@ struct AssetsView: View{
             
             List {
                 ForEach(assetsViewModel.assets) { asset in
-                        UserAssetRowView(asset: asset)
-                    }
+                    UserAssetRowView(asset: asset)
+                        .swipeActions(edge: .trailing){
+                            // delete
+                            Button{
+                                assetToDelete = asset
+                                showDeleteAlert = true
+                                
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                            .tint(.red)
+                            
+                            // update
+                            Button{
+                                assetsViewModel.editAsset(asset)
+                            } label: {
+                                Label("Edit", systemImage: "pencil")
+                            }
+                            .tint(.yellow)
+                        }
+                    
+                        .swipeActions(edge: .leading){
+                            // add
+                            Button{
+                                assetsViewModel.selectCoin(asset.coin)
+                            } label: {
+                                Label("Add", systemImage: "plus")
+                            }
+                        }
+                }
             }
             .listStyle(.plain)
+            .alert("Delete your asset?", isPresented: $showDeleteAlert){
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    if let asset = assetToDelete {
+                        assetsViewModel.removeAsset(withId: asset.id)
+                    }
+                }
+            } message: {
+                if let name = assetToDelete?.coin.name {
+                                Text("Are you sure you want to delete «\(name)»?")
+                            } else {
+                                Text("Are you sure you want to delete this asset?")
+                            }
+            }
         }
         
         .toolbar{
@@ -59,6 +104,10 @@ struct AssetsView: View{
         }
         .fullScreenCover(isPresented:$isOpenSheet){
             FullScreenCoverAddAssetsView(coinListViewModel:coinListViewModel, assetsViewModel: assetsViewModel)
+        }
+        
+        .sheet(isPresented: $assetsViewModel.showAddSheet){
+            AddCoinAmountSheet(assetsViewModel: assetsViewModel)
         }
     }
 }
