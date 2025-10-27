@@ -130,6 +130,7 @@ struct AssetsView: View{
         
         .sheet(isPresented: $assetsViewModel.showAddSheet){
             AddCoinAmountSheet(assetsViewModel: assetsViewModel)
+                .environment(\.modelContext, context)
         }
         .onAppear{
             Task{

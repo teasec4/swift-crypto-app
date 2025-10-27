@@ -31,14 +31,19 @@ final class AssetsViewModel: ObservableObject{
     }
     
     /// Loads assets for the specified user from the given ModelContext.
+    @MainActor
     func loadAssets(for user: UserEntity, context: ModelContext) {
         do {
-                let fetched = try context.fetch(FetchDescriptor<UserAsset>())
-                assets = fetched.filter { $0.user?.id == user.id }
-            } catch {
-                print("Failed to load assets: \(error)")
-                assets = []
-            }
+            
+            let fetched = try context.fetch(FetchDescriptor<UserAsset>())
+            
+            
+            assets = fetched.filter { $0.user?.id == user.id }
+            
+        } catch {
+            print("❌ Failed to load assets:", error)
+            assets = []
+        }
     }
     
     /// Adds a new asset for the specified user into the ModelContext and updates the local assets list.

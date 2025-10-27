@@ -145,11 +145,17 @@ final class AuthViewModel: ObservableObject {
             predicate: #Predicate { $0.id == userId }
         )
         
-        if let existing = try? context.fetch(descriptor), !existing.isEmpty {
-            return
+        // can be a problem
+        if let existing = try? context.fetch(descriptor).first{
+            //
+            existing.email = user.email
+            existing.name = user.name
+            self.user = existing
+        } else {
+            context.insert(user)
+            self.user = user
         }
         
-        context.insert(user)
         try? context.save()
     }
 }

@@ -36,6 +36,7 @@ struct ContentView: View {
                            .navigationTitle("Assets")
                            .navigationBarTitleDisplayMode(.inline)
                    }
+                   .environment(\.modelContext, context)
                    .opacity(selected == 1 ? 1 : 0)
                    .animation(nil, value: selected)
                    
@@ -44,6 +45,7 @@ struct ContentView: View {
                            .navigationTitle("Profile")
                            .navigationBarTitleDisplayMode(.inline)
                    }
+                   .environment(\.modelContext, context)
                    .opacity(selected == 2 ? 1 : 0)
                    .animation(nil, value: selected)
                }
@@ -57,6 +59,12 @@ struct ContentView: View {
            .onChange(of: authVM.user) { newUser in
                assetsViewModel.currentUser = newUser
                if let user = newUser {
+                   assetsViewModel.loadAssets(for: user, context: context)
+               }
+           }
+           .onAppear {
+               if let user = authVM.user {
+                   assetsViewModel.currentUser = user
                    assetsViewModel.loadAssets(for: user, context: context)
                }
            }

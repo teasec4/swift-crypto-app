@@ -11,6 +11,7 @@ struct CoinsPage: View {
     @ObservedObject var globalMarketViewModel: GlobalMarketViewModel
     @ObservedObject var coinListViewModel: CoinListViewModel
     @ObservedObject var assetsViewModel: AssetsViewModel
+    @Environment(\.modelContext) private var context
     
     @State private var isOpenSheet: Bool = false
     
@@ -30,6 +31,7 @@ struct CoinsPage: View {
             }
             .fullScreenCover(isPresented:$isOpenSheet){
                 FullScreenCoverAddAssetsView(coinListViewModel:coinListViewModel, assetsViewModel: assetsViewModel)
+                    .environment(\.modelContext, context)
             }
     }
     

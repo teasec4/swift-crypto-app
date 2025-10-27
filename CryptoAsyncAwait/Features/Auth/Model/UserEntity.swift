@@ -15,6 +15,7 @@ final class UserEntity{
     var name: String?
     
     @Relationship(deleteRule: .cascade, inverse: \UserAsset.user)
+    var assets: [UserAsset] = []
     
     init(id: String, email: String, name: String? = nil) {
         self.id = id
