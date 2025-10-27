@@ -50,3 +50,18 @@ extension CoinAPI{
         }
     }
 }
+
+
+// MARK: - fetch for assets
+extension CoinAPI {
+    func fetchSimplePrices(for coinIDs: [String]) async throws -> [String: Double] {
+        let ids = coinIDs.joined(separator: ",")
+        guard let url = URL(string: "\(baseURL)/simple/price?ids=\(ids)&vs_currencies=usd") else {
+            throw URLError(.badURL)
+        }
+
+        let response: [String: [String: Double]] = try await network.request(url)
+        
+        return response.mapValues { $0["usd"] ?? 0.0 }
+    }
+}

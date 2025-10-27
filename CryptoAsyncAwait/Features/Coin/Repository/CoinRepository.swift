@@ -10,6 +10,7 @@ import Foundation
 protocol CoinRepositoryProtocol {
     func getCoins(page: Int, limit: Int) async throws -> [Coin]
     func getTopCoins(limit: Int) async throws -> [Coin]
+    func getSimplePrices(for coinIDs: [String]) async throws -> [String: Double]
 }
 
 final class CoinRepository: CoinRepositoryProtocol {
@@ -69,4 +70,20 @@ final class CoinRepository: CoinRepositoryProtocol {
         }
     }
     
+    func getSimplePrices(for coinIDs: [String]) async throws -> [String: Double] {
+            do {
+                return try await api.fetchSimplePrices(for: coinIDs)
+            } catch let urlError as URLError {
+                switch urlError.code {
+                case .badURL:
+                    throw CoinError.invalidURL
+                case .badServerResponse:
+                    throw CoinError.serverError
+                default:
+                    throw CoinError.unkown(urlError)
+                }
+            } catch {
+                throw CoinError.unkown(error)
+            }
+        }
 }

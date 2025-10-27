@@ -9,7 +9,7 @@ import UIKit
 
 struct CustomTabBar: View {
     @Binding var selected: Int
-    let icons = ["bitcoinsign.circle", "graph.2d", "person.fill"]
+    let icons = ["bitcoinsign.circle", "briefcase.fill", "person.fill"]
     let titles = ["Coins", "Assets", "Profile"]
     
     var body: some View {

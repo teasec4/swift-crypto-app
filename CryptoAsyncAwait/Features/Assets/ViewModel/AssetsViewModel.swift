@@ -18,6 +18,12 @@ final class AssetsViewModel: ObservableObject{
     @Published var formMode: AssetFormMode? = nil
     @Published var currentUser: UserEntity?
     
+    private let repository: CoinRepositoryProtocol
+    
+    init(repository: CoinRepositoryProtocol = DependencyContainer.shared.coinRepository) {
+            self.repository = repository
+        }
+    
     
     enum AssetFormMode {
         case add
@@ -116,4 +122,25 @@ final class AssetsViewModel: ObservableObject{
         formMode = .edit(asset)
         showAddSheet = true
     }
+}
+
+extension AssetsViewModel{
+    func refreshAssetPrices(context: ModelContext) async {
+            guard !assets.isEmpty else { return }
+
+            do {
+                let ids = assets.map { $0.coinID }
+                let prices = try await repository.getSimplePrices(for: ids)
+
+                for asset in assets {
+                    if let newPrice = prices[asset.coinID] {
+                        asset.coinPrice = newPrice
+                    }
+                }
+
+                try context.save()
+            } catch {
+                print("❌ Failed to update prices: \(error)")
+            }
+        }
 }

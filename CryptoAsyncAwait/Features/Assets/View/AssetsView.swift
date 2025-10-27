@@ -38,11 +38,11 @@ struct AssetsView: View{
                     Text("USD")
                         .foregroundStyle(.secondary)
                 }
-                HStack{
-                    Text("Todays PnL")
-                    Text("+$5,81 (1,49%)")
-                        .foregroundColor(.green)
-                }
+//                HStack{
+//                    Text("Todays PnL")
+//                    Text("+$5,81 (1,49%)")
+//                        .foregroundColor(.green)
+//                }
                 
             }
             .padding()
@@ -111,6 +111,18 @@ struct AssetsView: View{
                     Image(systemName: "plus")
                 }
             }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                   Button {
+                       Task {
+                           await assetsViewModel.refreshAssetPrices(
+                               context: context
+                           )
+                       }
+                   } label: {
+                       Label("Refresh Prices", systemImage: "arrow.clockwise")
+                   }
+               }
         }
         .fullScreenCover(isPresented:$isOpenSheet){
             FullScreenCoverAddAssetsView(coinListViewModel:coinListViewModel, assetsViewModel: assetsViewModel)
@@ -118,6 +130,11 @@ struct AssetsView: View{
         
         .sheet(isPresented: $assetsViewModel.showAddSheet){
             AddCoinAmountSheet(assetsViewModel: assetsViewModel)
+        }
+        .onAppear{
+            Task{
+                await assetsViewModel.refreshAssetPrices(context: context)
+            }
         }
     }
 }
