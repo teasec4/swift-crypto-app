@@ -7,9 +7,41 @@
 import Foundation
 import SwiftData
 
-struct UserAsset: Identifiable, Hashable {
-    let id = UUID()
-    let coin: Coin
+@Model
+final class UserAsset {
+    @Attribute(.unique) var id: UUID
     var amount: Double
+    var coinID: String
+    var coinName: String
+    var coinSymbol: String
+    var coinImage: String
+    var coinPrice: Double
     
+    @Relationship var user: UserEntity?
+
+    init(coin: Coin, amount: Double, user: UserEntity?) {
+        self.id = UUID()
+        self.amount = amount
+        self.coinID = coin.id
+        self.coinName = coin.name
+        self.coinSymbol = coin.symbol
+        self.coinImage = coin.image
+        self.coinPrice = coin.currentPrice
+        self.user = user
+    }
+}
+
+extension UserAsset {
+    var coin: Coin {
+        Coin(
+            id: coinID,
+            symbol: coinSymbol,
+            name: coinName,
+            image: coinImage,
+            currentPrice: coinPrice,
+            marketCapRank: nil,
+            priceChange24H: nil,
+            priceChangePercentage24H: nil
+        )
+    }
 }

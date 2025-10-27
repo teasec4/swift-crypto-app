@@ -5,11 +5,15 @@
 //  Created by Максим Ковалев on 10/24/25.
 //
 import SwiftUI
+import SwiftData
 
 struct AssetsView: View{
     @ObservedObject var coinListViewModel: CoinListViewModel
     @State private var isOpenSheet: Bool = false
     @ObservedObject var assetsViewModel: AssetsViewModel
+    
+    @Environment(\.modelContext) private var context
+    @EnvironmentObject var authVM: AuthViewModel
     
     @State private var showDeleteAlert = false
     @State private var assetToDelete: UserAsset?
@@ -42,6 +46,12 @@ struct AssetsView: View{
                 
             }
             .padding()
+            .onAppear {
+                if let user = authVM.user {
+                    assetsViewModel.currentUser = user
+                    assetsViewModel.loadAssets(for: user, context: context)
+                }
+            }
             
             List {
                 ForEach(assetsViewModel.assets) { asset in
@@ -77,12 +87,12 @@ struct AssetsView: View{
                 }
             }
             .listStyle(.plain)
-            .alert("Delete your asset?", isPresented: $showDeleteAlert){
+            .alert("Deleting asset", isPresented: $showDeleteAlert){
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
                     if let asset = assetToDelete {
-                        assetsViewModel.removeAsset(withId: asset.id)
-                    }
+                           try? assetsViewModel.removeAsset(withId: asset.id, context: context)
+                       }
                 }
             } message: {
                 if let name = assetToDelete?.coin.name {

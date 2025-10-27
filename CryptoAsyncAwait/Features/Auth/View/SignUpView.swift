@@ -8,6 +8,7 @@ import SwiftUI
 
 struct SignUpView: View {
     @EnvironmentObject var authVM: AuthViewModel
+    @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var email = ""
@@ -33,7 +34,7 @@ struct SignUpView: View {
                 
                 Button(action: {
                     focusedField = nil
-                    Task { await authVM.signUp(name: name, email: email, password: password) }
+                    Task { await authVM.signUp(name: name, email: email, password: password, context: context) }
                 }) {
                     Text("Sign Up")
                         .frame(maxWidth: .infinity)

@@ -6,9 +6,19 @@
 //
 
 import Foundation
+import SwiftData
 
-struct UserEntity: Identifiable {
-    let id: String
-    let email: String
-    let name: String?
+@Model
+final class UserEntity{
+    @Attribute(.unique) var id: String
+    var email: String
+    var name: String?
+    
+    @Relationship(deleteRule: .cascade, inverse: \UserAsset.user)
+    
+    init(id: String, email: String, name: String? = nil) {
+        self.id = id
+        self.email = email
+        self.name = name
+    }
 }

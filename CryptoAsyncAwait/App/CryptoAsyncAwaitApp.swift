@@ -16,6 +16,10 @@ struct CryptoAsyncAwaitApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(authVM)
+                .modelContainer(for: [
+                                    UserEntity.self,
+                                    UserAsset.self
+                                ])
                
         }
     }

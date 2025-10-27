@@ -12,6 +12,9 @@ struct AddCoinFormView: View {
     @ObservedObject var assetsViewModel: AssetsViewModel
     var dismiss: DismissAction
     
+    @Environment(\.modelContext) private var context
+    
+    
     private var total: Double {
         let amount = Double(assetsViewModel.inputAmount) ?? 0.0
         return amount * coin.currentPrice
@@ -61,8 +64,10 @@ struct AddCoinFormView: View {
             
             // MARK: - Button
             Button {
-                assetsViewModel.saveAsset()
-                dismiss()
+                if assetsViewModel.currentUser != nil {
+                        try? assetsViewModel.saveAsset(context: context)
+                        dismiss()
+                    }
             } label: {
                 HStack {
                     if case .edit = assetsViewModel.formMode {
