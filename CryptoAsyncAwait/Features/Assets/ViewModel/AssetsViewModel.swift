@@ -4,148 +4,123 @@
 //
 //  Created by Максим Ковалев on 10/24/25.
 //
+
 import SwiftUI
 import Combine
 import SwiftData
 import Foundation
 
 @MainActor
-final class AssetsViewModel: ObservableObject{
+final class AssetsViewModel: ObservableObject {
     @Published private(set) var assets: [UserAsset] = []
-    @Published var selectedCoin: Coin? = nil
-    @Published var inputAmount: String = ""
-    @Published var showAddSheet = false
-    @Published var formMode: AssetFormMode? = nil
     @Published var currentUser: UserEntity?
     
+
+    // initiate repo
     private let repository: CoinRepositoryProtocol
     
     init(repository: CoinRepositoryProtocol = DependencyContainer.shared.coinRepository) {
-            self.repository = repository
-        }
-    
-    
-    enum AssetFormMode {
-        case add
-        case edit(UserAsset)
+        self.repository = repository
     }
     
-    /// Loads assets for the specified user from the given ModelContext.
-    @MainActor
-    func loadAssets(for user: UserEntity, context: ModelContext) {
+    
+    /// Загружает ассеты для текущего пользователя
+    func loadAssets(context: ModelContext) {
+        guard let user = currentUser else {
+            print("⚠️ No current user set, cannot load assets")
+            assets = []
+            return
+        }
+        
         do {
-            
-            let fetched = try context.fetch(FetchDescriptor<UserAsset>())
-            
-            
-            assets = fetched.filter { $0.user?.id == user.id }
-            
+            let all = try context.fetch(FetchDescriptor<UserAsset>())
+            assets = all.filter { $0.user?.id == user.id }
         } catch {
             print("❌ Failed to load assets:", error)
             assets = []
         }
     }
     
-    /// Adds a new asset for the specified user into the ModelContext and updates the local assets list.
-    func addAsset(for user: UserEntity, context: ModelContext) throws {
-        guard let coin = selectedCoin,
-              let amount = Double(inputAmount), amount > 0 else { return }
+    /// Добавляет новый ассет или увеличивает количество существующего (только для текущего пользователя)
+    func addAsset(coin: Coin, amount: Double, context: ModelContext) throws {
+        guard amount > 0 else { return }
+        guard let user = currentUser else {
+            print("⚠️ No current user set, cannot add asset")
+            return
+        }
         
-        if let existingAsset = assets.first(where: { $0.coin.id == coin.id }) {
-            existingAsset.amount += amount
-            try context.save()
+        // Проверяем, есть ли уже этот ассет у пользователя
+        if let existing = user.assets.first(where: { $0.coin.id == coin.id }) {
+            existing.amount += amount
         } else {
             let newAsset = UserAsset(coin: coin, amount: amount, user: user)
             context.insert(newAsset)
-            try context.save()
-            assets.append(newAsset)
+            user.assets.append(newAsset)
         }
-        showAddSheet = false
-        selectedCoin = nil
-        formMode = nil
+        
+        try context.save()
+        loadAssets(context: context)
     }
     
-    /// Saves the current asset state for the specified user in the given ModelContext.
-    func saveAsset(context: ModelContext) throws {
+    /// Обновляет количество существующего ассета
+    func updateAsset(_ asset: UserAsset, newAmount: Double, context: ModelContext) throws {
+        guard newAmount >= 0 else { return }
         guard let user = currentUser else { return }
-        guard let coin = selectedCoin,
-              let amount = Double(inputAmount), amount > 0 else { return }
-
-        switch formMode {
-        case .add:
-            try addAsset(for: user, context: context)
-        case .edit(let existingAsset):
-            if let index = assets.firstIndex(where: { $0.id == existingAsset.id }) {
-                assets[index].amount = amount
-                try context.save()
-            }
-        case .none:
-            return
+        guard asset.user?.id == user.id else { return }  // безопасность
+        
+        if let index = assets.firstIndex(where: { $0.id == asset.id }) {
+            assets[index].amount = newAmount
+            try context.save()
+            loadAssets(context: context)
         }
-
-        showAddSheet = false
-        selectedCoin = nil
-        formMode = nil
     }
     
-    /// Removes an asset with the specified id from local list and ModelContext.
+    /// Удаляет ассет по ID (только для текущего пользователя)
     func removeAsset(withId id: UUID, context: ModelContext) throws {
-        if let index = assets.firstIndex(where: { $0.id == id }) {
-            let asset = assets[index]
+        guard let user = currentUser else { return }
+        
+        if let asset = assets.first(where: { $0.id == id && $0.user?.id == user.id }) {
             context.delete(asset)
             try context.save()
-            assets.remove(at: index)
+            loadAssets(context: context)
         }
     }
     
-    /// Clears all assets associated with the specified user from ModelContext and local list.
-    func clearAssets(for user: UserEntity, context: ModelContext) throws {
-        let allAssets = try context.fetch(FetchDescriptor<UserAsset>())
-        let userAssets = allAssets.filter { $0.user?.id == user.id }
-        for asset in userAssets {
+    /// Полностью очищает все ассеты текущего пользователя
+    func clearAllAssets(context: ModelContext) throws {
+        guard let user = currentUser else { return }
+        
+        for asset in user.assets {
             context.delete(asset)
         }
         try context.save()
         assets.removeAll()
     }
     
-    // MARK: - Computed total value
+    /// Обновляет цены ассетов текущего пользователя
+    func refreshAssetPrices(context: ModelContext) async {
+        guard let user = currentUser else { return }
+        guard !user.assets.isEmpty else { return }
+        
+        do {
+            let ids = user.assets.map { $0.coinID }
+            let prices = try await repository.getSimplePrices(for: ids)
+            
+            for a in user.assets {
+                if let newPrice = prices[a.coinID] {
+                    a.coinPrice = newPrice
+                }
+            }
+            try context.save()
+            loadAssets(context: context)
+        } catch {
+            print("❌ Failed to refresh prices:", error)
+        }
+    }
+    
+    // MARK: - Computed
+    
     var totalValueUSD: Double {
         assets.reduce(0) { $0 + $1.coin.currentPrice * $1.amount }
     }
-    
-    func selectCoin(_ coin: Coin) {
-        selectedCoin = coin
-        inputAmount = ""
-        formMode = .add
-        showAddSheet = true
-    }
-    
-    func editAsset(_ asset: UserAsset) {
-        selectedCoin = asset.coin
-        inputAmount = String(asset.amount)
-        formMode = .edit(asset)
-        showAddSheet = true
-    }
-}
-
-extension AssetsViewModel{
-    func refreshAssetPrices(context: ModelContext) async {
-            guard !assets.isEmpty else { return }
-
-            do {
-                let ids = assets.map { $0.coinID }
-                let prices = try await repository.getSimplePrices(for: ids)
-
-                for asset in assets {
-                    if let newPrice = prices[asset.coinID] {
-                        asset.coinPrice = newPrice
-                    }
-                }
-
-                try context.save()
-            } catch {
-                print("❌ Failed to update prices: \(error)")
-            }
-        }
 }

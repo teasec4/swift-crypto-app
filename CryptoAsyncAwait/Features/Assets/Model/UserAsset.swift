@@ -17,7 +17,8 @@ final class UserAsset {
     var coinImage: String
     var coinPrice: Double
     
-    @Relationship var user: UserEntity?
+    
+    var user: UserEntity?
 
     init(coin: Coin, amount: Double, user: UserEntity?) {
         self.id = UUID()

@@ -9,27 +9,32 @@ import SwiftData
 
 struct AssetsView: View{
     @ObservedObject var coinListViewModel: CoinListViewModel
-    @State private var isOpenSheet: Bool = false
     @ObservedObject var assetsViewModel: AssetsViewModel
     
-    @Environment(\.modelContext) private var context
-    @EnvironmentObject var authVM: AuthViewModel
+    // creating a state for form
+    @StateObject private var formState = AssetFormState()
     
+    // open FullScreenAddAssetsView
+    @State  var isOpenSheet: Bool = false
+    
+    // context to save data
+    @Environment(\.modelContext) private var context
+    
+    // delete alert
     @State private var showDeleteAlert = false
     @State private var assetToDelete: UserAsset?
     
     var body: some View{
         VStack(alignment:.leading, spacing: 16){
+            // Header
             VStack(alignment:.leading, spacing: 16){
                 HStack{
                     Text("Total Assets")
                         .foregroundStyle(.secondary)
-                    
                     Button{
                         
                     } label: {
                         Image(systemName: "eye.slash")
-                        
                     }
                 }
                 HStack{
@@ -38,20 +43,8 @@ struct AssetsView: View{
                     Text("USD")
                         .foregroundStyle(.secondary)
                 }
-//                HStack{
-//                    Text("Todays PnL")
-//                    Text("+$5,81 (1,49%)")
-//                        .foregroundColor(.green)
-//                }
-                
             }
             .padding()
-            .onAppear {
-                if let user = authVM.user {
-                    assetsViewModel.currentUser = user
-                    assetsViewModel.loadAssets(for: user, context: context)
-                }
-            }
             
             List {
                 ForEach(assetsViewModel.assets) { asset in
@@ -69,7 +62,7 @@ struct AssetsView: View{
                             
                             // update
                             Button{
-                                assetsViewModel.editAsset(asset)
+                                formState.startEdit(asset: asset)
                             } label: {
                                 Label("Edit", systemImage: "pencil")
                             }
@@ -79,7 +72,7 @@ struct AssetsView: View{
                         .swipeActions(edge: .leading){
                             // add
                             Button{
-                                assetsViewModel.selectCoin(asset.coin)
+                                formState.startAdd(coin: asset.coin)
                             } label: {
                                 Label("Add", systemImage: "plus")
                             }
@@ -91,19 +84,21 @@ struct AssetsView: View{
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
                     if let asset = assetToDelete {
-                           try? assetsViewModel.removeAsset(withId: asset.id, context: context)
-                       }
+                        try? assetsViewModel.removeAsset(withId: asset.id, context: context)
+                    }
                 }
             } message: {
                 if let name = assetToDelete?.coin.name {
-                                Text("Are you sure you want to delete «\(name)»?")
-                            } else {
-                                Text("Are you sure you want to delete this asset?")
-                            }
+                    Text("Are you sure you want to delete «\(name)»?")
+                } else {
+                    Text("Are you sure you want to delete this asset?")
+                }
             }
         }
         
+        
         .toolbar{
+            // Open full screen cover to adding asset
             ToolbarItem(placement:.primaryAction){
                 Button{
                     isOpenSheet = true
@@ -112,29 +107,48 @@ struct AssetsView: View{
                 }
             }
             
+            // manual fetyching price
             ToolbarItem(placement: .navigationBarTrailing) {
-                   Button {
-                       Task {
-                           await assetsViewModel.refreshAssetPrices(
-                               context: context
-                           )
-                       }
-                   } label: {
-                       Label("Refresh Prices", systemImage: "arrow.clockwise")
-                   }
-               }
-        }
-        .fullScreenCover(isPresented:$isOpenSheet){
-            FullScreenCoverAddAssetsView(coinListViewModel:coinListViewModel, assetsViewModel: assetsViewModel)
+                Button {
+                    Task {
+                        await assetsViewModel.refreshAssetPrices(
+                            context: context
+                        )
+                    }
+                } label: {
+                    Label("Refresh Prices", systemImage: "arrow.clockwise")
+//                        .symbolEffect(.rotate.clockwise.byLayer, options: .repeat(.continuous))
+                }
+                
+            }
         }
         
-        .sheet(isPresented: $assetsViewModel.showAddSheet){
-            AddCoinAmountSheet(assetsViewModel: assetsViewModel)
-                .environment(\.modelContext, context)
+        // full screencover sheet (better to change coinListView for new VM for search)
+            .fullScreenCover(isPresented:$isOpenSheet){
+                FullScreenCoverAddAssetsView(coinListViewModel:coinListViewModel, assetsViewModel: assetsViewModel, formState: formState)
+            }
+        
+        // open the form this currnet taped coin
+        .sheet(isPresented: $formState.showAddSheet) {
+            if let coin = formState.selectedCoin {
+                AddCoinFormView(
+                    coin: coin,
+                    assetsViewModel: assetsViewModel,
+                    formState: formState
+                )
+                .presentationDetents([.fraction(0.5)])
+                .presentationDragIndicator(.visible)
+            }
         }
-        .onAppear{
-            Task{
-                await assetsViewModel.refreshAssetPrices(context: context)
+        
+        
+        // load currentUser asset and updating price
+        .onAppear {
+            if let _ = assetsViewModel.currentUser {
+                assetsViewModel.loadAssets(context: context)
+                Task {
+                    await assetsViewModel.refreshAssetPrices(context: context)
+                }
             }
         }
     }

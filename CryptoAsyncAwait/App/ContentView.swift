@@ -3,7 +3,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    // repository already initialized in ViewModel by defoult
+    // repository already initialized in ViewModel by default
     @StateObject private var globalMarketViewModel = GlobalMarketViewModel()
     @StateObject private var coinListViewModel = CoinListViewModel()
     @StateObject private var assetsViewModel = AssetsViewModel()
@@ -59,13 +59,15 @@ struct ContentView: View {
            .onChange(of: authVM.user) { newUser in
                assetsViewModel.currentUser = newUser
                if let user = newUser {
-                   assetsViewModel.loadAssets(for: user, context: context)
+                   assetsViewModel.loadAssets(context: context)
+               } else {
+                   
                }
            }
            .onAppear {
                if let user = authVM.user {
                    assetsViewModel.currentUser = user
-                   assetsViewModel.loadAssets(for: user, context: context)
+                   assetsViewModel.loadAssets(context: context)
                }
            }
        }
