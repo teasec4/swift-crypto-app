@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		956DAAE92EB20D9500D8624B /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 956DAAE82EB20D8F00D8624B /* README.md */; };
 		957AA3242EA7BA5C00D159EC /* ViewInspector in Frameworks */ = {isa = PBXBuildFile; productRef = 957AA3232EA7BA5C00D159EC /* ViewInspector */; };
 		957AA3412EA88FA000D159EC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 957AA3402EA88FA000D159EC /* Alamofire */; };
 		95D6BBBE2EA116EF00B5BEB9 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 95D6BBBD2EA116EF00B5BEB9 /* Auth */; };
@@ -25,6 +26,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		956DAAE82EB20D8F00D8624B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		95D6BBD62EA119A000B5BEB9 /* CryptoAsyncAwaitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CryptoAsyncAwaitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		95D6BBE42EA1D91300B5BEB9 /* CryptoAsyncAwait.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CryptoAsyncAwait.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -40,6 +42,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		956DAAEA2EB20F6300D8624B /* Screenshoots */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Screenshoots;
+			sourceTree = "<group>";
+		};
 		95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -86,6 +93,8 @@
 		95D6BAEA2EA115E100B5BEB9 = {
 			isa = PBXGroup;
 			children = (
+				956DAAEA2EB20F6300D8624B /* Screenshoots */,
+				956DAAE82EB20D8F00D8624B /* README.md */,
 				95D6BBE22EA11B5700B5BEB9 /* .github */,
 				95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */,
 				95D6BBD62EA119A000B5BEB9 /* CryptoAsyncAwaitTests.xctest */,
@@ -110,6 +119,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				956DAAEA2EB20F6300D8624B /* Screenshoots */,
 				95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */,
 				95D6BBE22EA11B5700B5BEB9 /* .github */,
 			);
@@ -197,6 +207,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				956DAAE92EB20D9500D8624B /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
