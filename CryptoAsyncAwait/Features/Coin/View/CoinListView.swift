@@ -67,7 +67,8 @@ struct CoinListView: View {
                 }
             }
             .refreshable {
-                // ✅ Pull-to-refresh: обновляет список цен
+                // ✅ Pull-to-refresh: инвалидирует кэш и обновляет список цен
+                coinListViewModel.invalidateCaches()
                 await coinListViewModel.loadCoins()
             }
             

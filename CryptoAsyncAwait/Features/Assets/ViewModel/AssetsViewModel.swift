@@ -156,9 +156,9 @@ final class AssetsViewModel: ObservableObject {
             print("🔄 Fetching prices for \(ids.count) coins...")
             let prices = try await repository.getSimplePrices(for: ids)
             
-            // ✅ Обновляем только цены в локальном массиве
+            // ✅ Обновляем только цены в локальном массиве с валидацией
             for index in assets.indices {
-                if let newPrice = prices[assets[index].coinID] {
+                if let newPrice = prices[assets[index].coinID], newPrice > 0 {
                     assets[index].coinPrice = newPrice
                 }
             }
@@ -170,7 +170,8 @@ final class AssetsViewModel: ObservableObject {
     }
     
     /// Принудительное обновление цен (игнорирует дебаунс) - для pull-to-refresh
-    func forceRefreshAssetPrices(context: ModelContext) async {
+    /// Бросает ошибку если обновление не удалось
+    func forceRefreshAssetPrices(context: ModelContext) async throws {
         guard !assets.isEmpty else {
             print("⚠️ No assets to refresh")
             return
@@ -178,7 +179,29 @@ final class AssetsViewModel: ObservableObject {
         
         print("🔄 Force refreshing asset prices...")
         lastPriceRefreshTime = .distantPast
-        await refreshAssetPrices(context: context)
+        
+        // ✅ Инвалидируем кэш перед принудительным обновлением
+        if let repository = repository as? CoinRepository {
+            repository.invalidatePricesCache()
+        }
+        
+        do {
+            let ids = assets.map { $0.coinID }
+            print("🔄 Fetching prices for \(ids.count) coins...")
+            let prices = try await repository.getSimplePrices(for: ids)
+            
+            // ✅ Обновляем только цены в локальном массиве с валидацией
+            for index in assets.indices {
+                if let newPrice = prices[assets[index].coinID], newPrice > 0 {
+                    assets[index].coinPrice = newPrice
+                }
+            }
+            try context.save()
+            print("✅ Asset prices updated and saved")
+        } catch {
+            print("❌ Failed to refresh prices:", error)
+            throw error // ✅ Пробрасываем ошибку вверх
+        }
     }
     
     // MARK: - Computed

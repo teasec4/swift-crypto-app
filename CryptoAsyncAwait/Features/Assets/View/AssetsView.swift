@@ -24,6 +24,10 @@ struct AssetsView: View {
     @State private var showDeleteAlert = false
     @State private var assetToDelete: UserAsset?
     
+    // refresh error handling
+    @State private var refreshError: String?
+    @State private var showRefreshError = false
+    
     var body: some View{
         VStack(alignment:.leading, spacing: 16){
             // Header
@@ -94,9 +98,23 @@ struct AssetsView: View {
                     Text("Are you sure you want to delete this asset?")
                 }
             }
+            .alert("Failed to Update Prices", isPresented: $showRefreshError) {
+                Button("Retry") {
+                    Task {
+                        await refreshAssetPrices()
+                    }
+                }
+                Button("OK", role: .cancel) { }
+            } message: {
+                if let error = refreshError {
+                    Text(error)
+                } else {
+                    Text("Unable to refresh prices at this time")
+                }
+            }
             .refreshable {
-                // ✅ Pull-to-refresh: обновляет цены ассетов
-                await assetsViewModel.forceRefreshAssetPrices(context: context)
+                // ✅ Pull-to-refresh: обновляет цены ассетов с error handling
+                await refreshAssetPrices()
             }
         }
         
@@ -115,9 +133,7 @@ struct AssetsView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     Task {
-                        await assetsViewModel.forceRefreshAssetPrices(
-                            context: context
-                        )
+                        await refreshAssetPrices()
                     }
                 } label: {
                     Label("Refresh Prices", systemImage: "arrow.clockwise")
@@ -166,6 +182,16 @@ struct AssetsView: View {
         assetsViewModel.loadAssets(context: context)
         Task {
             await assetsViewModel.refreshAssetPrices(context: context)
+        }
+    }
+    
+    // ✅ Helper для обновления цен с error handling
+    private func refreshAssetPrices() async {
+        do {
+            try await assetsViewModel.forceRefreshAssetPrices(context: context)
+        } catch {
+            refreshError = error.localizedDescription
+            showRefreshError = true
         }
     }
 }

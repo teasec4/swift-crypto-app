@@ -11,9 +11,8 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                
-                VStack(spacing: 24) {
+            
+                VStack{
                     
                     // User Info Card
                     VStack(spacing: 16) {
@@ -79,6 +78,7 @@ struct ProfileView: View {
                         .background(Color.red.opacity(0.1))
                         .foregroundColor(.red)
                         .cornerRadius(12)
+                        .padding(.bottom, 40)
                     }
                     
                     // Error message
@@ -99,9 +99,10 @@ struct ProfileView: View {
                     
                 }
                 .padding(20)
-            }
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.inline)
+                .navigationTitle("Profile")
+                .navigationBarTitleDisplayMode(.inline)
+            
+            
         }
     }
     

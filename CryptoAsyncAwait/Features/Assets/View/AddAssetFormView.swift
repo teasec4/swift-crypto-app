@@ -82,9 +82,9 @@ struct AddAssetFormView: View {
                     
                     Task {
                         await viewModel.submit(context: context)
-                        showToastFeedback()
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        // ✅ Дропускаем dismiss сразу после успеха (без delay)
+                        if case .idle = viewModel.mode {
+                            showToastFeedback()
                             dismiss()
                         }
                     }

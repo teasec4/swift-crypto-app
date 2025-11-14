@@ -39,6 +39,13 @@ final class CoinListViewModel: ObservableObject {
     private(set) var currentPage = 1
     private var canLoadMore = true
     
+    // ✅ Защита от race conditions при загрузке
+    private var loadingTask: Task<Void, Never>?
+    private var searchLoadingTask: Task<Void, Never>?
+    
+    // ✅ Retry логика
+    private let maxRetries = 3
+    private var retryCount = 0
     
     init(
         repository: CoinRepositoryProtocol? = nil,
@@ -49,30 +56,78 @@ final class CoinListViewModel: ObservableObject {
     }
     
     func loadCoins() async {
-        state = .loading
-        currentPage = 1
-        canLoadMore = true
+        // ✅ Отменяем предыдущую загрузку если она идёт
+        loadingTask?.cancel()
+        
+        loadingTask = Task {
+            state = .loading
+            currentPage = 1
+            canLoadMore = true
+            retryCount = 0
+            
+            await loadCoinsWithRetry(page: 1, limit: 50)
+        }
+    }
+    
+    // ✅ Вспомогательный метод с retry логикой
+    private func loadCoinsWithRetry(page: Int, limit: Int) async {
         do {
-            let coins = try await repository.getCoins(page: 1, limit: 50)
+            let coins = try await repository.getCoins(page: page, limit: limit)
             state = coins.isEmpty ? .empty : .content(coins)
-        } catch let coinError as CoinError{
-            state = .error(coinError.errorDescription ?? "Unexpected error")
+            retryCount = 0
+        } catch let coinError as CoinError {
+            if retryCount < maxRetries {
+                retryCount += 1
+                print("🔄 Retrying coin load (attempt \(retryCount)/\(maxRetries))...")
+                try? await Task.sleep(nanoseconds: UInt64(retryCount * 500_000_000)) // 0.5s, 1s, 1.5s
+                await loadCoinsWithRetry(page: page, limit: limit)
+            } else {
+                state = .error(coinError.errorDescription ?? "Failed to load coins after \(maxRetries) attempts")
+            }
         } catch {
-            state = .error(error.localizedDescription)
+            if retryCount < maxRetries {
+                retryCount += 1
+                print("🔄 Retrying coin load (attempt \(retryCount)/\(maxRetries))...")
+                try? await Task.sleep(nanoseconds: UInt64(retryCount * 500_000_000))
+                await loadCoinsWithRetry(page: page, limit: limit)
+            } else {
+                state = .error(error.localizedDescription)
+            }
         }
     }
     
     func loadCoinsForSearch() async {
-        guard allCoinsCache.isEmpty else { return }
+        // ✅ Отменяем предыдущую загрузку если она идёт
+        searchLoadingTask?.cancel()
+        
+        // ✅ Защита от повторных загрузок если уже загружаем
+        guard allCoinsCache.isEmpty && !isLoadingSearch else { return }
+        
         isLoadingSearch = true
         allCoinsLoadingErrorMessage = nil
-        defer { isLoadingSearch = false }
+        
+        searchLoadingTask = Task {
+            await loadCoinsForSearchWithRetry()
+            isLoadingSearch = false
+        }
+    }
+    
+    // ✅ Вспомогательный метод с retry логикой для поиска
+    private func loadCoinsForSearchWithRetry(retryAttempt: Int = 0) async {
         do {
             let coins = try await repository.getTopCoins(limit: 500)
             allCoinsCache = coins
             allCoinsLoadingErrorMessage = nil
+            print("✅ Loaded \(coins.count) coins for search")
         } catch {
-            allCoinsLoadingErrorMessage = error.localizedDescription
+            if retryAttempt < maxRetries {
+                print("🔄 Retrying search load (attempt \(retryAttempt + 1)/\(maxRetries))...")
+                try? await Task.sleep(nanoseconds: UInt64((retryAttempt + 1) * 500_000_000))
+                await loadCoinsForSearchWithRetry(retryAttempt: retryAttempt + 1)
+            } else {
+                allCoinsLoadingErrorMessage = error.localizedDescription
+                print("❌ Failed to load coins for search: \(error.localizedDescription)")
+            }
         }
     }
     
@@ -80,7 +135,7 @@ final class CoinListViewModel: ObservableObject {
         guard case .content(let existingCoins) = state else { return }
         guard !isLoadingMore, canLoadMore else { return }
         
-        
+        // ✅ Проверяем, нужно ли загружать ещё (находимся ближе к концу)
         if let index = existingCoins.firstIndex(where: { $0.id == currentCoin.id }),
            index >= existingCoins.count - 3 {
             
@@ -91,9 +146,13 @@ final class CoinListViewModel: ObservableObject {
                 currentPage += 1
                 let newCoins = try await repository.getCoins(page: currentPage, limit: 50)
                 canLoadMore = !newCoins.isEmpty
-                state = .content(existingCoins + newCoins)
-            } catch {
                 
+                // ✅ Проверяем что state всё ещё содержит те же монеты перед добавлением
+                if case .content(let currentCoins) = state {
+                    state = .content(currentCoins + newCoins)
+                }
+            } catch {
+                print("❌ Failed to load more coins:", error)
                 canLoadMore = false
             }
         }
@@ -102,6 +161,14 @@ final class CoinListViewModel: ObservableObject {
     func reloadTask() {
         Task {
             await loadCoins()
+        }
+    }
+    
+    // ✅ Инвалидировать кэши перед обновлением
+    func invalidateCaches() {
+        if let repository = repository as? CoinRepository {
+            repository.invalidateAllCoinsCache()
+            repository.invalidatePricesCache()
         }
     }
     
