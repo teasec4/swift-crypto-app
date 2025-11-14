@@ -94,6 +94,10 @@ struct AssetsView: View {
                     Text("Are you sure you want to delete this asset?")
                 }
             }
+            .refreshable {
+                // ✅ Pull-to-refresh: обновляет цены ассетов
+                await assetsViewModel.forceRefreshAssetPrices(context: context)
+            }
         }
         
         

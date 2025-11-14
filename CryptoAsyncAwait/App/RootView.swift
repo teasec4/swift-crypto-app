@@ -23,7 +23,7 @@ struct RootView: View {
         }
         .animation(.easeInOut(duration: 0.25), value: authVM.user != nil)
         .onAppear {
-            // ✅ При запуске приложения восстанавливаем пользователя из БД
+            // restoring user from database
             print("🚀 RootView appeared - restoring user from database")
             authVM.restoreUserFromDatabase(context: context)
         }

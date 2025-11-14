@@ -146,12 +146,14 @@ final class AssetsViewModel: ObservableObject {
         // ✅ Дебаунс: не обновляем чаще, чем раз в 60 секунд
         let now = Date()
         guard now.timeIntervalSince(lastPriceRefreshTime) > priceRefreshMinInterval else {
+            print("⏳ Price refresh skipped (debounced)")
             return
         }
         lastPriceRefreshTime = now
         
         do {
             let ids = assets.map { $0.coinID }
+            print("🔄 Fetching prices for \(ids.count) coins...")
             let prices = try await repository.getSimplePrices(for: ids)
             
             // ✅ Обновляем только цены в локальном массиве
@@ -161,14 +163,20 @@ final class AssetsViewModel: ObservableObject {
                 }
             }
             try context.save()
-            // ✅ Не перезагружаем всё
+            print("✅ Asset prices updated and saved")
         } catch {
             print("❌ Failed to refresh prices:", error)
         }
     }
     
-    /// Принудительное обновление цен (игнорирует дебаунс)
+    /// Принудительное обновление цен (игнорирует дебаунс) - для pull-to-refresh
     func forceRefreshAssetPrices(context: ModelContext) async {
+        guard !assets.isEmpty else {
+            print("⚠️ No assets to refresh")
+            return
+        }
+        
+        print("🔄 Force refreshing asset prices...")
         lastPriceRefreshTime = .distantPast
         await refreshAssetPrices(context: context)
     }

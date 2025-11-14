@@ -66,6 +66,10 @@ struct CoinListView: View {
                     }
                 }
             }
+            .refreshable {
+                // ✅ Pull-to-refresh: обновляет список цен
+                await coinListViewModel.loadCoins()
+            }
             
         }
     }

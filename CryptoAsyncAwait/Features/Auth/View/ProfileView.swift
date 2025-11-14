@@ -12,33 +12,8 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                LinearGradient(
-                    gradient: Gradient(colors: [Color(.systemGray6), Color(.systemBackground)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
                 
                 VStack(spacing: 24) {
-                    Spacer()
-                    
-                    // Avatar
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [.blue, .cyan]),
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 100, height: 100)
-                        
-                        Text(initials)
-                            .font(.system(size: 40, weight: .bold))
-                            .foregroundColor(.white)
-                    }
                     
                     // User Info Card
                     VStack(spacing: 16) {
@@ -122,7 +97,6 @@ struct ProfileView: View {
                         .transition(.opacity)
                     }
                     
-                    Spacer()
                 }
                 .padding(20)
             }
