@@ -62,22 +62,25 @@ struct ContentView: View {
         .onChange(of: authVM.user) { newUser in
             print("👤 User changed: \(newUser?.email ?? "nil")")
             assetsViewModel.currentUser = newUser
-            if let user = newUser {
-                print("📲 Loading assets for: \(user.email)")
+            addAssetViewModel.setAssetsViewModel(assetsViewModel)
+            
+            if newUser != nil {
+                print("📲 Loading assets for: \(newUser?.email ?? "")")
                 assetsViewModel.loadAssets(context: context)
-                addAssetViewModel.setAssetsViewModel(assetsViewModel)
             }
         }
         .onAppear {
-            print("🚀 App appeared")
+            print("🚀 ContentView appeared")
+            
+            // ✅ Если пользователь уже загружен из App.onAppear, используем его
             if let user = authVM.user {
                 print("👤 Current user: \(user.email)")
                 assetsViewModel.currentUser = user
                 assetsViewModel.loadAssets(context: context)
                 addAssetViewModel.setAssetsViewModel(assetsViewModel)
-            } else {
-                print("⚠️ No user on app appear")
             }
+            
+            // Загружаем рыночные данные
             Task {
                 async let globalData = globalMarketViewModel.loadGlobalData()
                 async let coinsData = coinListViewModel.loadCoins()

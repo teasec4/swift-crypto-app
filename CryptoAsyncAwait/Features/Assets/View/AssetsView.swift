@@ -145,11 +145,16 @@ struct AssetsView: View {
         
         // load currentUser assets and update prices
         .onAppear {
+            // ✅ currentUser уже установлен из ContentView
+            print("📱 AssetsView appeared, user: \(assetsViewModel.currentUser?.email ?? "nil")")
             formViewModel.setAssetsViewModel(assetsViewModel)
             loadAssetsData()
         }
-        .onChange(of: assetsViewModel.currentUser) { _ in
-            loadAssetsData()
+        .onChange(of: assetsViewModel.currentUser) { newUser in
+            // ✅ Если пользователь изменился, перезагружаем ассеты
+            if newUser != nil {
+                loadAssetsData()
+            }
         }
     }
     

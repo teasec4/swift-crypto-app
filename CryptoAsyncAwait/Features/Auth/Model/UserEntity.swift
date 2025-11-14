@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class UserEntity{
+final class UserEntity: Equatable {
     @Attribute(.unique) var email: String
     var supabaseId: String
     var name: String?
@@ -21,5 +21,10 @@ final class UserEntity{
         self.supabaseId = supabaseId
         self.email = email
         self.name = name
+    }
+    
+    // ✅ Equatable conformance - сравниваем только по email (уникальный ключ)
+    static func == (lhs: UserEntity, rhs: UserEntity) -> Bool {
+        lhs.email == rhs.email
     }
 }

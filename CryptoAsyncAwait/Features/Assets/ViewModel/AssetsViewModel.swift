@@ -39,18 +39,21 @@ final class AssetsViewModel: ObservableObject {
             return
         }
         
+        print("📥 loadAssets for: \(user.email)")
+        
         do {
-            // Пытаемся загрузить через relationship
-            if !user.assets.isEmpty {
-                assets = user.assets
-                print("✅ Loaded \(assets.count) assets via relationship for: \(user.email)")
-                return
-            }
+            // ✅ Загружаем через relationship (самый надёжный способ)
+            print("   Fetching from user.assets relationship...")
+            let relationshipAssets = user.assets
+            print("   Found \(relationshipAssets.count) assets in relationship")
             
-            // Если relationship пуста, загружаем через поиск
-            let all = try context.fetch(FetchDescriptor<UserAsset>())
-            assets = all.filter { $0.user?.email == user.email }
-            print("✅ Loaded \(assets.count) assets via fetch for: \(user.email)")
+            assets = relationshipAssets
+            
+            if assets.isEmpty {
+                print("⚠️ No assets found for: \(user.email)")
+            } else {
+                print("✅ Loaded \(assets.count) assets for: \(user.email)")
+            }
         } catch {
             print("❌ Failed to load assets:", error)
             assets = []
@@ -69,6 +72,8 @@ final class AssetsViewModel: ObservableObject {
         }
         
         print("💾 addAsset called for \(user.email): \(coin.name) x\(amount)")
+        print("   User ID: \(user.supabaseId)")
+        print("   Current assets count before: \(user.assets.count)")
         
         // Проверяем, есть ли уже этот ассет у пользователя
         if let existingIndex = assets.firstIndex(where: { $0.coin.id == coin.id }) {
@@ -79,6 +84,7 @@ final class AssetsViewModel: ObservableObject {
         } else {
             // Создаём новый ассет
             let newAsset = UserAsset(coin: coin, amount: amount, user: user)
+            print("   Created new asset: \(newAsset.id)")
             context.insert(newAsset)
             user.assets.append(newAsset)  // ✅ Добавляем в relationship user.assets
             assets.append(newAsset)
@@ -89,6 +95,7 @@ final class AssetsViewModel: ObservableObject {
         do {
             try context.save()
             print("✅ Context saved successfully")
+            print("   Assets in DB: \(user.assets.count)")
         } catch {
             print("❌ Failed to save context: \(error)")
             throw error
