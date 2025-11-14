@@ -1,5 +1,5 @@
 //
-//  FullScreenCoverAddAssetsView.swift
+//  AddAssetModalView.swift
 //  CryptoAsyncAwait
 //
 //  Created by Максим Ковалев on 10/24/25.
@@ -7,49 +7,42 @@
 
 import SwiftUI
 
-struct FullScreenCoverAddAssetsView: View {
-    // VM for searching (bad practice swich to new VM)
+struct AddAssetModalView: View {
+    // VM for searching
     @ObservedObject var coinListViewModel: CoinListViewModel
+    @ObservedObject var viewModel: AddAssetViewModel
     
-    // sugest to switch to EnviromentObject
-    @ObservedObject var assetsViewModel: AssetsViewModel
-    
-
-    // creating Form
-    @ObservedObject var formState : AssetFormState
-    
-    // close the currnet sheet option
+    // close the current sheet option
     @Environment(\.dismiss) var dismiss
     
-    
     var body: some View {
-        NavigationStack{
-            ZStack{
+        NavigationStack {
+            ZStack {
                 // loading screen and fetch coins list
-                Group{
-                    if coinListViewModel.isLoadingSearch{
-                        List{
+                Group {
+                    if coinListViewModel.isLoadingSearch {
+                        List {
                             ForEach(0..<20, id: \.self) { _ in
                                 CoinRowSkeletonView()
                             }
                         }
                         .listStyle(.plain)
                     } else {
-                        List{
-                            ForEach(coinListViewModel.filteredCoins){ coin in
+                        List {
+                            ForEach(coinListViewModel.filteredCoins) { coin in
                                 CoinRowView(coin: coin)
-                                    // open the form this currnet taped coin
                                     .onTapGesture {
-                                        formState.startAdd(coin:coin)
+                                        viewModel.startAdd(coin: coin)
                                     }
                             }
                         }
                         .listStyle(.plain)
                     }
+                    
                     // if have an error
                     if let error = coinListViewModel.allCoinsLoadingErrorMessage {
-                        ZStack{
-                            List{
+                        ZStack {
+                            List {
                                 ForEach(0..<20, id: \.self) { _ in
                                     CoinRowSkeletonView()
                                 }
@@ -73,17 +66,6 @@ struct FullScreenCoverAddAssetsView: View {
                         }
                     }
                 }
-                
-                // good feature think about it
-                //                .searchSuggestions {
-                //                    ForEach(coinListViewModel.filteredCoins.prefix(5)) { coin in
-                //                        Button {
-                //
-                //                        } label: {
-                //                            CoinRowView(coin: coin)
-                //                        }
-                //                    }
-                //                }
             }
             // searchable
             .searchable(text: $coinListViewModel.searchText,
@@ -98,9 +80,9 @@ struct FullScreenCoverAddAssetsView: View {
             .navigationTitle("Add Asset")
             .navigationBarTitleDisplayMode(.inline)
             // close the sheet
-            .toolbar{
-                ToolbarItem(placement:.topBarLeading){
-                    Button{
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark.circle.fill")
@@ -108,25 +90,21 @@ struct FullScreenCoverAddAssetsView: View {
                     }
                 }
             }
-            // task for fetching 500 coins from GeicoAPI
-            .task{
+            // task for fetching 500 coins from CoinGeckoAPI
+            .task {
                 await coinListViewModel.loadCoinsForSearch()
             }
-            // open the form this currnet taped coin
-            .sheet(isPresented: $formState.showAddSheet) {
-                if let coin = formState.selectedCoin {
-                    AddCoinFormView(
+            // open the form for selected coin
+            .sheet(isPresented: $viewModel.showSheet) {
+                if let coin = viewModel.selectedCoin {
+                    AddAssetFormView(
                         coin: coin,
-                        assetsViewModel: assetsViewModel,
-                        formState: formState
+                        viewModel: viewModel
                     )
                     .presentationDetents([.fraction(0.5)])
                     .presentationDragIndicator(.visible)
                 }
             }
         }
-        
     }
 }
-
-

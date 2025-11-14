@@ -17,18 +17,22 @@ final class AuthViewModel: ObservableObject {
     var lastAuthUpdate: Date?
     
     private let client = SupabaseService.shared.client
+    private let persistenceService: UserPersistenceServiceProtocol
     private var authTask: Task<Void, Never>?
     
-    init() {
-        // get user
+    init(persistenceService: UserPersistenceServiceProtocol = UserPersistenceService()) {
+        self.persistenceService = persistenceService
+        // get user from SwiftData or create new one
         Task{ [weak self] in
             guard let self else { return }
             if let u = client.auth.currentUser {
+                print("🔐 Supabase user: \(u.email ?? "unknown")")
                 let localUser = UserEntity(
-                    id: u.id.uuidString,
+                    supabaseId: u.id.uuidString,
                     email: u.email ?? "",
                     name: u.userMetadata["name"]?.stringValue
                 )
+                print("👤 Setting user in AuthViewModel: \(localUser.email)")
                 self.user = localUser
             }
         }
@@ -46,7 +50,7 @@ final class AuthViewModel: ObservableObject {
                 case .initialSession, .signedIn:
                     if let u = session?.user {
                         self.user = UserEntity(
-                            id: u.id.uuidString,
+                            supabaseId: u.id.uuidString,
                             email: u.email ?? "",
                             name: u.userMetadata["name"]?.stringValue
                         )
@@ -74,7 +78,7 @@ final class AuthViewModel: ObservableObject {
             )
             let u = resp.user
             let localUser = UserEntity(
-                           id: u.id.uuidString,
+                           supabaseId: u.id.uuidString,
                            email: u.email ?? "",
                            name: u.userMetadata["name"]?.stringValue
                        )
@@ -93,7 +97,7 @@ final class AuthViewModel: ObservableObject {
                 let session = try await self.client.auth.signIn(email: email, password: password)
                 let u = session.user
                 let localUser = UserEntity(
-                                    id: u.id.uuidString,
+                                    supabaseId: u.id.uuidString,
                                     email: u.email ?? "",
                                     name: u.userMetadata["name"]?.stringValue
                                 )
@@ -138,24 +142,11 @@ final class AuthViewModel: ObservableObject {
     
     // MARK: - Save user to local storage
     private func saveUserToSwiftData(_ user: UserEntity, context: ModelContext) {
-        // does user exist?
-        let userId = user.id
-        
-        let descriptor = FetchDescriptor<UserEntity>(
-            predicate: #Predicate { $0.id == userId }
-        )
-        
-        // can be a problem
-        if let existing = try? context.fetch(descriptor).first{
-            //
-            existing.email = user.email
-            existing.name = user.name
-            self.user = existing
-        } else {
-            context.insert(user)
+        do {
+            try persistenceService.saveUser(user, context: context)
             self.user = user
+        } catch {
+            print("❌ Failed to save user:", error)
         }
-        
-        try? context.save()
     }
 }

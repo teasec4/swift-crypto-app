@@ -6,34 +6,28 @@
 //
 import Foundation
 
-final class CoinAPI {
+final class CoinAPI: CoinDataFetchingService, GlobalMarketDataFetchingService, ChartDataFetchingService, SimplePriceFetchingService {
     private let network: NetworkServiceProtocol
     private let baseURL = "https://api.coingecko.com/api/v3/"
     
     init(network: NetworkServiceProtocol = NetworkService()) {
         self.network = network
     }
-}
-
-// MARK: - Coin
-extension CoinAPI{
+    
+    // MARK: - CoinDataFetchingService
     func fetchCoins(page: Int, limit: Int) async throws -> [Coin] {
         let url = URL(string: "\(baseURL)/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=\(limit)&page=\(page)&sparkline=false")!
         return try await network.request(url)
     }
-}
-
-// MARK: - Global Market
-extension CoinAPI{
+    
+    // MARK: - GlobalMarketDataFetchingService
     func fetchGlobalData() async throws -> GlobalMarketData {
         let url = URL(string: "\(baseURL)/global")!
         let response: GlobalResponse = try await network.request(url)
         return response.data
     }
-}
-
-// MARK: -  ChartData
-extension CoinAPI{
+    
+    // MARK: - ChartDataFetchingService
     func fetchChartData(for coinID: String, days: Int = 30) async throws -> [PricePoint] {
         let url = URL(string: "\(baseURL)/coins/\(coinID)/market_chart?vs_currency=usd&days=\(days)")!
         let json = try await network.requestRawJSON(url)
@@ -49,11 +43,8 @@ extension CoinAPI{
             return nil
         }
     }
-}
-
-
-// MARK: - fetch for assets
-extension CoinAPI {
+    
+    // MARK: - SimplePriceFetchingService
     func fetchSimplePrices(for coinIDs: [String]) async throws -> [String: Double] {
         let ids = coinIDs.joined(separator: ",")
         guard let url = URL(string: "\(baseURL)/simple/price?ids=\(ids)&vs_currencies=usd") else {

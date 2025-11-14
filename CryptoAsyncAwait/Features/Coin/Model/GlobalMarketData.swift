@@ -5,7 +5,7 @@
 //  Created by Максим Ковалев on 10/9/25.
 //
 
-struct GlobalMarketData: Decodable {
+struct GlobalMarketData: Decodable, Equatable {
     let totalMarketCap: [String: Double]?
     let totalVolume: [String: Double]?
     let marketCapChangePercentage24hUsd: Double?

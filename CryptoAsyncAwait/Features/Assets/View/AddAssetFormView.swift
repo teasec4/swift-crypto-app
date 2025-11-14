@@ -1,5 +1,5 @@
 //
-//  AddCoinFormView.swift
+//  AddAssetFormView.swift
 //  CryptoAsyncAwait
 //
 //  Created by Максим Ковалев on 10/24/25.
@@ -7,32 +7,28 @@
 
 import SwiftUI
 
-struct AddCoinFormView: View {
-    // context for saving id DB for current User
+struct AddAssetFormView: View {
+    // context for saving to DB for current User
     @Environment(\.modelContext) private var context
     
     @Environment(\.dismiss) private var dismiss
     
     // dependencies
     let coin: Coin
-    @ObservedObject var assetsViewModel: AssetsViewModel
-    @ObservedObject var formState: AssetFormState
+    @ObservedObject var viewModel: AddAssetViewModel
+    @EnvironmentObject var assetsViewModel: AssetsViewModel
     
-    // succes toast
+    // success toast
     @State private var showToast = false
     
     // computed helper for button view
     private var amountValue: Double {
-        Double(formState.inputAmount) ?? 0
-    }
-    
-    private var total: Double {
-        amountValue * coin.currentPrice
+        Double(viewModel.inputAmount) ?? 0
     }
     
     var body: some View {
-        ZStack{
-            VStack{
+        ZStack {
+            VStack {
                 // header
                 HStack(spacing: 20) {
                     AsyncImage(url: coin.imageUrl) { image in
@@ -47,7 +43,7 @@ struct AddCoinFormView: View {
                             .frame(width: 60, height: 60)
                     }
                     
-                    VStack{
+                    VStack {
                         Text(coin.name)
                             .font(.title2)
                             .fontWeight(.semibold)
@@ -65,50 +61,36 @@ struct AddCoinFormView: View {
                 
                 // input field
                 VStack(alignment: .leading, spacing: 8) {
-                    TextField("Enter amount to add", text: $formState.inputAmount)
+                    TextField("Enter amount to add", text: $viewModel.inputAmount)
                         .keyboardType(.decimalPad)
                         .textFieldStyle(.roundedBorder)
                         .padding()
                         .font(.title)
-                    
+                }
+                
+                // error message
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding(.horizontal)
                 }
                 
                 // save button
                 Button {
                     guard amountValue > 0 else { return }
-                    // unwrap current user
-                    guard let currentUser = assetsViewModel.currentUser else { return }
                     
-                    switch formState.mode{
-                    case .add:
-                        try? assetsViewModel.addAsset(
-                            coin: coin,
-                            amount: amountValue,
-                            context: context
-                        )
-                    case .edit(let existing):
-                        try? assetsViewModel.updateAsset(
-                            existing,
-                            newAmount: amountValue,
-                            context: context
-                        )
-                    case .none:
-                        break
+                    Task {
+                        await viewModel.submit(context: context)
+                        showToastFeedback()
                         
-                    }
-                    
-                    showToastFeedback()
-                    
-                    // close the form
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        formState.reset()
-                        dismiss()
-                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            dismiss()
+                        }
                     }
                 } label: {
-                    // trying make button looks better :)
                     HStack {
-                        Text(formState.modeIsEdit ? "Save Changes" : "Add to Asset")
+                        Text(viewModel.submitButtonTitle)
                             .foregroundStyle(.black)
                         Spacer()
                         HStack {
@@ -117,7 +99,7 @@ struct AddCoinFormView: View {
                             } placeholder: {
                                 Circle().fill(Color(.systemGray5)).frame(width: 20, height: 20)
                             }
-                            Text(formState.inputAmount)
+                            Text(viewModel.inputAmount)
                                 .foregroundStyle(.black)
                         }
                         Spacer()
@@ -125,7 +107,7 @@ struct AddCoinFormView: View {
                             Image(systemName: "dollarsign.circle.fill")
                                 .foregroundColor(.green)
                                 .frame(width: 20, height: 20)
-                            Text("≈ \(total.toCurrency())")
+                            Text("≈ \(viewModel.totalValue.toCurrency())")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                                 .foregroundColor(.green)
@@ -133,19 +115,18 @@ struct AddCoinFormView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(
-                        .white
-                    )
+                    .background(.white)
                     .cornerRadius(12)
                 }
                 .padding(.horizontal)
-                .disabled(Double(formState.inputAmount) == nil || Double(formState.inputAmount)! <= 0)
+                .disabled(amountValue <= 0 || viewModel.isLoading)
             }
+            
             // Toast
             if showToast {
                 VStack {
                     Spacer()
-                    Label("Added \(formState.inputAmount) \(coin.symbol.uppercased())", systemImage: "checkmark.circle.fill")
+                    Label("Added \(viewModel.inputAmount) \(coin.symbol.uppercased())", systemImage: "checkmark.circle.fill")
                         .font(.subheadline.weight(.semibold))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)
@@ -170,11 +151,5 @@ struct AddCoinFormView: View {
                 showToast = false
             }
         }
-    }
-}
-
-private extension AssetFormState {
-    var modeIsEdit: Bool {
-        if case .edit = mode { return true } else { return false }
     }
 }

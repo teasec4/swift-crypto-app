@@ -7,15 +7,15 @@
 import SwiftUI
 import SwiftData
 
-struct AssetsView: View{
+struct AssetsView: View {
     @ObservedObject var coinListViewModel: CoinListViewModel
     @ObservedObject var assetsViewModel: AssetsViewModel
     
     // creating a state for form
-    @StateObject private var formState = AssetFormState()
+    @StateObject private var formViewModel = AddAssetViewModel()
     
-    // open FullScreenAddAssetsView
-    @State  var isOpenSheet: Bool = false
+    // open AddAssetModalView
+    @State private var isOpenSheet: Bool = false
     
     // context to save data
     @Environment(\.modelContext) private var context
@@ -61,18 +61,18 @@ struct AssetsView: View{
                             .tint(.red)
                             
                             // update
-                            Button{
-                                formState.startEdit(asset: asset)
+                            Button {
+                                formViewModel.startEdit(asset: asset)
                             } label: {
                                 Label("Edit", systemImage: "pencil")
                             }
                             .tint(.yellow)
                         }
                     
-                        .swipeActions(edge: .leading){
+                        .swipeActions(edge: .leading) {
                             // add
-                            Button{
-                                formState.startAdd(coin: asset.coin)
+                            Button {
+                                formViewModel.startAdd(coin: asset.coin)
                             } label: {
                                 Label("Add", systemImage: "plus")
                             }
@@ -97,59 +97,66 @@ struct AssetsView: View{
         }
         
         
-        .toolbar{
+        .toolbar {
             // Open full screen cover to adding asset
-            ToolbarItem(placement:.primaryAction){
-                Button{
+            ToolbarItem(placement: .primaryAction) {
+                Button {
                     isOpenSheet = true
                 } label: {
                     Image(systemName: "plus")
                 }
             }
             
-            // manual fetyching price
+            // manual fetching price
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     Task {
-                        await assetsViewModel.refreshAssetPrices(
+                        await assetsViewModel.forceRefreshAssetPrices(
                             context: context
                         )
                     }
                 } label: {
                     Label("Refresh Prices", systemImage: "arrow.clockwise")
-//                        .symbolEffect(.rotate.clockwise.byLayer, options: .repeat(.continuous))
                 }
-                
             }
         }
         
-        // full screencover sheet (better to change coinListView for new VM for search)
-            .fullScreenCover(isPresented:$isOpenSheet){
-                FullScreenCoverAddAssetsView(coinListViewModel:coinListViewModel, assetsViewModel: assetsViewModel, formState: formState)
-            }
+        // full screen cover sheet for adding asset
+        .fullScreenCover(isPresented: $isOpenSheet) {
+            AddAssetModalView(
+                coinListViewModel: coinListViewModel,
+                viewModel: formViewModel
+            )
+            .environmentObject(assetsViewModel)
+        }
         
-        // open the form this currnet taped coin
-        .sheet(isPresented: $formState.showAddSheet) {
-            if let coin = formState.selectedCoin {
-                AddCoinFormView(
+        // open the form for selected coin
+        .sheet(isPresented: $formViewModel.showSheet) {
+            if let coin = formViewModel.selectedCoin {
+                AddAssetFormView(
                     coin: coin,
-                    assetsViewModel: assetsViewModel,
-                    formState: formState
+                    viewModel: formViewModel
                 )
+                .environmentObject(assetsViewModel)
                 .presentationDetents([.fraction(0.5)])
                 .presentationDragIndicator(.visible)
             }
         }
         
-        
-        // load currentUser asset and updating price
+        // load currentUser assets and update prices
         .onAppear {
-            if let _ = assetsViewModel.currentUser {
-                assetsViewModel.loadAssets(context: context)
-                Task {
-                    await assetsViewModel.refreshAssetPrices(context: context)
-                }
-            }
+            formViewModel.setAssetsViewModel(assetsViewModel)
+            loadAssetsData()
+        }
+        .onChange(of: assetsViewModel.currentUser) { _ in
+            loadAssetsData()
+        }
+    }
+    
+    private func loadAssetsData() {
+        assetsViewModel.loadAssets(context: context)
+        Task {
+            await assetsViewModel.refreshAssetPrices(context: context)
         }
     }
 }

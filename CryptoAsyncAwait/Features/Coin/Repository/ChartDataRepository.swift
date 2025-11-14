@@ -9,14 +9,14 @@ protocol ChartRepositoryProtocol {
 }
 
 final class ChartDataRepository: ChartRepositoryProtocol {
-    private let api: CoinAPI
+    private let dataFetcher: ChartDataFetchingService
     
-    init(api: CoinAPI) {
-        self.api = api
+    init(dataFetcher: ChartDataFetchingService) {
+        self.dataFetcher = dataFetcher
     }
     
     func getChartData(for coinID: String, days: Int) async throws -> [PricePoint] {
-        try await api.fetchChartData(for: coinID, days:days)
+        try await dataFetcher.fetchChartData(for: coinID, days: days)
     }
 }
 

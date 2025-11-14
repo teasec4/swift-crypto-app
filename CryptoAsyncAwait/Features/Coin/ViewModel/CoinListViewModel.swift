@@ -27,7 +27,7 @@ final class CoinListViewModel: ObservableObject {
         var id: String { rawValue }
     }
     
-    enum ScreenState{
+    enum ScreenState {
         case loading
         case error(String)
         case empty
@@ -35,12 +35,17 @@ final class CoinListViewModel: ObservableObject {
     }
     
     private let repository: CoinRepositoryProtocol
+    private let searchService: CoinSearchServiceProtocol
     private(set) var currentPage = 1
     private var canLoadMore = true
     
     
-    init(repository: CoinRepositoryProtocol? = nil) {
+    init(
+        repository: CoinRepositoryProtocol? = nil,
+        searchService: CoinSearchServiceProtocol = CoinSearchService()
+    ) {
         self.repository = repository ?? DependencyContainer.shared.coinRepository
+        self.searchService = searchService
     }
     
     func loadCoins() async {
@@ -100,78 +105,10 @@ final class CoinListViewModel: ObservableObject {
         }
     }
     
-    // use fuzzy match
-    var filteredCoins : [Coin] {
-        if allCoinsCache.isEmpty {
-                return []
-            }
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        let filteredByText = query.isEmpty
-        ? allCoinsCache
-        : allCoinsCache.filter { coin in
-            fuzzyMatch(coin.name.lowercased(), query)
-            || fuzzyMatch(coin.symbol.lowercased(), query)
-        }
+    var filteredCoins: [Coin] {
+        guard !allCoinsCache.isEmpty else { return [] }
         
-        
-        switch selectedScope {
-        case .top10: return filteredByText
-                .sorted(by: { ($0.marketCapRank ?? 0) < ($1.marketCapRank ?? 0) })
-                .prefix(10)
-                .map { $0 }
-        case .defi:
-            return filteredByText.filter { $0.name.localizedCaseInsensitiveContains("defi") }
-        case .ai:
-            return filteredByText.filter {
-                $0.name.range(of: #"\bAI\b"#, options: [.regularExpression, .caseInsensitive]) != nil
-            }
-        default:
-            return filteredByText
-        }
+        let searchedCoins = searchService.search(allCoinsCache, by: searchText)
+        return searchService.filterByScope(searchedCoins, scope: selectedScope)
     }
-    
-    // fuzzy search
-    private func fuzzyMatch(_ text: String, _ pattern: String) -> Bool {
-        if text.contains(pattern) { return true }
-        // delete sapce and symbols
-        let normalizedText = text.replacingOccurrences(of: "[^a-z0-9]", with: "", options: .regularExpression)
-        let normalizedPattern = pattern.replacingOccurrences(of: "[^a-z0-9]", with: "", options: .regularExpression)
-        
-        // check for first letter (ex: btc → bitcoin)
-        if normalizedText.hasPrefix(normalizedPattern) { return true }
-        
-        // match by subsequence (b-t-c → bitcoin)
-        var tIndex = normalizedText.startIndex
-        for ch in normalizedPattern {
-            if let found = normalizedText[tIndex...].firstIndex(of: ch) {
-                tIndex = normalizedText.index(after: found)
-            } else {
-                return false
-            }
-        }
-        return true
-    }
-    
-    // levenshtein search
-    //    private func levenshtein(_ lhs: String, _ rhs: String) -> Int {
-    //        let lhs = Array(lhs)
-    //        let rhs = Array(rhs)
-    //        var dist = Array(0...rhs.count)
-    //        for (i, l) in lhs.enumerated() {
-    //            var newDist = [i + 1]
-    //            for (j, r) in rhs.enumerated() {
-    //                newDist.append(
-    //                    l == r ? dist[j] : min(dist[j], dist[j + 1], newDist[j]) + 1
-    //                )
-    //            }
-    //            dist = newDist
-    //        }
-    //        return dist.last!
-    //    }
-    
-    // and use it
-    //    return allCoins.filter {
-    //        levenshtein($0.name.lowercased(), query) < 3 ||
-    //        levenshtein($0.symbol.lowercased(), query) < 2
-    //    }
 }

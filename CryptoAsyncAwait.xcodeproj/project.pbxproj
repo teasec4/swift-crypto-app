@@ -42,9 +42,9 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		956DAAEA2EB20F6300D8624B /* Screenshoots */ = {
+		956DAAEA2EB20F6300D8624B /* Screenshots */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Screenshoots;
+			path = Screenshots;
 			sourceTree = "<group>";
 		};
 		95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */ = {
@@ -93,7 +93,7 @@
 		95D6BAEA2EA115E100B5BEB9 = {
 			isa = PBXGroup;
 			children = (
-				956DAAEA2EB20F6300D8624B /* Screenshoots */,
+				956DAAEA2EB20F6300D8624B /* Screenshots */,
 				956DAAE82EB20D8F00D8624B /* README.md */,
 				95D6BBE22EA11B5700B5BEB9 /* .github */,
 				95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */,
@@ -119,7 +119,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				956DAAEA2EB20F6300D8624B /* Screenshoots */,
+				956DAAEA2EB20F6300D8624B /* Screenshots */,
 				95D6BB662EA1165A00B5BEB9 /* CryptoAsyncAwait */,
 				95D6BBE22EA11B5700B5BEB9 /* .github */,
 			);

@@ -10,15 +10,15 @@ import SwiftData
 
 @Model
 final class UserEntity{
-    @Attribute(.unique) var id: String
-    var email: String
+    @Attribute(.unique) var email: String
+    var supabaseId: String
     var name: String?
     
     @Relationship(deleteRule: .cascade, inverse: \UserAsset.user)
     var assets: [UserAsset] = []
     
-    init(id: String, email: String, name: String? = nil) {
-        self.id = id
+    init(supabaseId: String, email: String, name: String? = nil) {
+        self.supabaseId = supabaseId
         self.email = email
         self.name = name
     }
