@@ -22,7 +22,7 @@ struct GlobalMarketHeaderView: View {
         case .loading:
             GlobalMarketSkeletonView()
 
-        case .error(let error):
+        case .error(_):
             EmptyView()
     
         case .empty:

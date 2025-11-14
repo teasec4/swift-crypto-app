@@ -36,21 +36,31 @@ final class AuthViewModel: ObservableObject {
             guard let self else { return }
             var lastAuthUpdate: Date?
             
-            for await (event, session) in await client.auth.authStateChanges {
-                guard Date().timeIntervalSince(lastAuthUpdate ?? .distantPast) > 1 else { continue }
-                lastAuthUpdate = Date()
-                
-                switch event {
-                case .initialSession, .signedIn:
-                    if let u = session?.user {
-                        print("🔐 Auth state changed: signed in as \(u.email ?? "unknown")")
-                        // Не создаём здесь юзера, это будет в signIn() или restoreUser()
+            do {
+                for await (event, session) in await client.auth.authStateChanges {
+                    // ✅ Проверяем отмену Task
+                    try Task.checkCancellation()
+                    
+                    guard Date().timeIntervalSince(lastAuthUpdate ?? .distantPast) > 1 else { continue }
+                    lastAuthUpdate = Date()
+                    
+                    switch event {
+                    case .initialSession, .signedIn:
+                        if let u = session?.user {
+                            print("🔐 Auth state changed: signed in as \(u.email ?? "unknown")")
+                            // Не создаём здесь юзера, это будет в signIn() или restoreUser()
+                        }
+                    case .signedOut:
+                        self.user = nil
+                    default:
+                        break
                     }
-                case .signedOut:
-                    self.user = nil
-                default:
-                    break
                 }
+            } catch is CancellationError {
+                // ✅ Нормально, Task был отменён при deinit
+                print("🛑 Auth state listener cancelled")
+            } catch {
+                print("❌ Auth state listener error: \(error)")
             }
         }
     }

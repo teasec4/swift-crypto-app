@@ -9,11 +9,15 @@ import SwiftUI
 
 struct CoinListView: View {
     @ObservedObject var coinListViewModel : CoinListViewModel
+    @State private var initialLoadAttempted = false
     
     var body: some View {
         bodyContent
             .task {
-                await coinListViewModel.loadCoins()
+                if !initialLoadAttempted {
+                    initialLoadAttempted = true
+                    await coinListViewModel.loadCoins()
+                }
             }
     }
     

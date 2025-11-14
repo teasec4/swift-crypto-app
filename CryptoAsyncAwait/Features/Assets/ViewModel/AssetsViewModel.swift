@@ -12,7 +12,12 @@ import Foundation
 
 @MainActor
 final class AssetsViewModel: ObservableObject {
-    @Published private(set) var assets: [UserAsset] = []
+    @Published private(set) var assets: [UserAsset] = [] {
+        didSet {
+            // ✅ Принудительно отправляем обновление при изменении массива
+            objectWillChange.send()
+        }
+    }
     @Published var currentUser: UserEntity?
     
     private let repository: CoinRepositoryProtocol
@@ -157,11 +162,19 @@ final class AssetsViewModel: ObservableObject {
             let prices = try await repository.getSimplePrices(for: ids)
             
             // ✅ Обновляем только цены в локальном массиве с валидацией
+            var updated = false
             for index in assets.indices {
                 if let newPrice = prices[assets[index].coinID], newPrice > 0 {
                     assets[index].coinPrice = newPrice
+                    updated = true
                 }
             }
+            
+            // ✅ Принудительно отправляем обновление если что-то изменилось
+            if updated {
+                objectWillChange.send()
+            }
+            
             try context.save()
             print("✅ Asset prices updated and saved")
         } catch {
@@ -191,11 +204,19 @@ final class AssetsViewModel: ObservableObject {
             let prices = try await repository.getSimplePrices(for: ids)
             
             // ✅ Обновляем только цены в локальном массиве с валидацией
+            var updated = false
             for index in assets.indices {
                 if let newPrice = prices[assets[index].coinID], newPrice > 0 {
                     assets[index].coinPrice = newPrice
+                    updated = true
                 }
             }
+            
+            // ✅ Принудительно отправляем обновление если что-то изменилось
+            if updated {
+                objectWillChange.send()
+            }
+            
             try context.save()
             print("✅ Asset prices updated and saved")
         } catch {

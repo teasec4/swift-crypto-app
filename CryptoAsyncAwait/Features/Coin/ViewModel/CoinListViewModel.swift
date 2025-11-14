@@ -13,6 +13,7 @@ final class CoinListViewModel: ObservableObject {
     @Published private(set) var isLoadingMore = false
     @Published var searchText: String = ""
     @Published var selectedScope: SearchScope = .all
+    @Published private(set) var hasAttemptedLoad = false
     
     @Published private(set) var allCoinsCache: [Coin] = []
     @Published private(set) var isLoadingSearch = false
@@ -60,7 +61,11 @@ final class CoinListViewModel: ObservableObject {
         loadingTask?.cancel()
         
         loadingTask = Task {
+            // ✅ Проверяем отмену сразу в начале
+            guard !Task.isCancelled else { return }
+            
             state = .loading
+            hasAttemptedLoad = true
             currentPage = 1
             canLoadMore = true
             retryCount = 0
@@ -72,10 +77,20 @@ final class CoinListViewModel: ObservableObject {
     // ✅ Вспомогательный метод с retry логикой
     private func loadCoinsWithRetry(page: Int, limit: Int) async {
         do {
+            // ✅ Проверяем отмену перед каждым запросом
+            guard !Task.isCancelled else { return }
+            
             let coins = try await repository.getCoins(page: page, limit: limit)
+            
+            // ✅ Ещё раз проверяем после получения результата
+            guard !Task.isCancelled else { return }
+            
             state = coins.isEmpty ? .empty : .content(coins)
             retryCount = 0
         } catch let coinError as CoinError {
+            // ✅ Не обновляем state если Task отменён
+            guard !Task.isCancelled else { return }
+            
             if retryCount < maxRetries {
                 retryCount += 1
                 print("🔄 Retrying coin load (attempt \(retryCount)/\(maxRetries))...")
@@ -85,6 +100,9 @@ final class CoinListViewModel: ObservableObject {
                 state = .error(coinError.errorDescription ?? "Failed to load coins after \(maxRetries) attempts")
             }
         } catch {
+            // ✅ Не обновляем state если Task отменён
+            guard !Task.isCancelled else { return }
+            
             if retryCount < maxRetries {
                 retryCount += 1
                 print("🔄 Retrying coin load (attempt \(retryCount)/\(maxRetries))...")
