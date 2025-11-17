@@ -3,9 +3,18 @@ import SwiftUI
 struct ContentView: View {
     // MARK: - ViewModels
     
-    @StateObject private var marketsListViewModel = MarketsListViewModel()
     @StateObject private var portfolioViewModel = PortfolioViewModel()
+    @StateObject private var marketsListViewModel = MarketsListViewModel()
     @StateObject private var themeManager = ThemeManager()
+    @StateObject private var addAssetViewModel: AddAssetViewModel
+    
+    init() {
+        let portfolioVM = PortfolioViewModel()
+        _portfolioViewModel = StateObject(wrappedValue: portfolioVM)
+        _marketsListViewModel = StateObject(wrappedValue: MarketsListViewModel())
+        _themeManager = StateObject(wrappedValue: ThemeManager())
+        _addAssetViewModel = StateObject(wrappedValue: AddAssetViewModel(portfolioViewModel: portfolioVM))
+    }
     
     // MARK: - Environment
     
@@ -22,12 +31,16 @@ struct ContentView: View {
                 MarketsPage()
                     .environmentObject(marketsListViewModel)
                     .environmentObject(portfolioViewModel)
+                    .environmentObject(addAssetViewModel)
+                    .environmentObject(themeManager)
                     .opacity(selected == 0 ? 1 : 0)
                     .allowsHitTesting(selected == 0)
                     .animation(nil, value: selected)
                 
                 NavigationStack {
                     PortfolioView(portfolioViewModel: portfolioViewModel)
+                        .environmentObject(addAssetViewModel)
+                        .environmentObject(themeManager)
                 }
                 .environment(\.modelContext, context)
                 .opacity(selected == 1 ? 1 : 0)

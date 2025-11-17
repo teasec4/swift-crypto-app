@@ -9,11 +9,11 @@ import SwiftUI
 import SwiftData
 
 struct MarketsListView: View {
-    @ObservedObject var coinListViewModel: MarketsListViewModel
+    @EnvironmentObject var coinListViewModel: MarketsListViewModel
     @Environment(\.modelContext) private var context
     @EnvironmentObject var themeManager: ThemeManager
     
-    @StateObject private var addAssetViewModel = AddAssetViewModel()
+    @EnvironmentObject var addAssetViewModel: AddAssetViewModel
     @EnvironmentObject var portfolioViewModel: PortfolioViewModel
     
     @State private var initialLoadAttempted = false
@@ -128,8 +128,8 @@ struct MarketsListView: View {
                     }
                 }
                 .refreshable {
-                    coinListViewModel.invalidateCaches()
-                    await coinListViewModel.loadCoins()
+                    let viewModel = coinListViewModel
+                    await viewModel.loadCoins()
                 }
             )
         }

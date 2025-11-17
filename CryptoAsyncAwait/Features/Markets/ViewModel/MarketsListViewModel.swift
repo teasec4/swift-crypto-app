@@ -2,8 +2,6 @@
 //  MarketsListViewModel.swift
 //  CryptoAsyncAwait
 //
-//  Created by Максим Ковалев
-//
 
 import Foundation
 import Combine
@@ -53,7 +51,12 @@ final class MarketsListViewModel: ObservableObject {
         repository: CoinRepositoryProtocol? = nil,
         searchService: CoinSearchServiceProtocol = CoinSearchService()
     ) {
-        self.repository = repository ?? DependencyContainer.shared.coinRepository
+        // ✅ Используем переданный repository, если нет - берём из container
+        if let repository = repository {
+            self.repository = repository
+        } else {
+            self.repository = DependencyContainer.shared.coinRepository
+        }
         self.searchService = searchService
     }
     
@@ -180,14 +183,6 @@ final class MarketsListViewModel: ObservableObject {
     func reloadTask() {
         Task {
             await loadCoins()
-        }
-    }
-    
-    // ✅ Инвалидировать кэши перед обновлением
-    func invalidateCaches() {
-        if let repository = repository as? CoinRepository {
-            repository.invalidateAllCoinsCache()
-            repository.invalidatePricesCache()
         }
     }
     

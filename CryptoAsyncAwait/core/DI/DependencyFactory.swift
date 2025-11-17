@@ -1,17 +1,23 @@
 //
-//  DependencyContainer.swift
+//  DependencyFactory.swift
 //  CryptoAsyncAwait
 //
 //  Created by Максим Ковалев
 //
 
-final class DependencyContainer {
-    // MARK: - Singleton
-    
-    static let shared = DependencyContainer()
-    
-    // MARK: - Private Factory Methods
-    
+import Foundation
+
+/// Протокол для создания зависимостей (возможна замена при тестировании)
+protocol DependencyFactory {
+    var coinRepository: CoinRepositoryProtocol { get }
+    var chartDataRepository: ChartRepositoryProtocol { get }
+    var coinSearchService: CoinSearchServiceProtocol { get }
+    var errorMappingService: ErrorMappingService { get }
+    var userPersistenceService: UserPersistenceServiceProtocol { get }
+}
+
+/// Реализация DependencyFactory для использования в production
+final class ProductionDependencyFactory: DependencyFactory {
     private lazy var networkService: NetworkServiceProtocol = NetworkService()
     
     private lazy var coinAPI: CoinAPI = {
@@ -30,8 +36,6 @@ final class DependencyContainer {
         UserPersistenceService()
     }()
     
-    // MARK: - Public Repositories (Lazy Initialization)
-    
     private lazy var coinRepositoryInstance: CoinRepositoryProtocol = {
         CoinRepository(
             dataFetcher: coinAPI,
@@ -43,8 +47,6 @@ final class DependencyContainer {
     private lazy var chartDataRepositoryInstance: ChartRepositoryProtocol = {
         ChartDataRepository(dataFetcher: coinAPI)
     }()
-    
-    // MARK: - Public Accessors
     
     var coinRepository: CoinRepositoryProtocol {
         coinRepositoryInstance
@@ -65,8 +67,4 @@ final class DependencyContainer {
     var userPersistenceService: UserPersistenceServiceProtocol {
         userPersistenceServiceInstance
     }
-    
-    // MARK: - Private Initialization
-    
-    private init() {}
 }

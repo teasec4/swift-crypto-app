@@ -48,7 +48,6 @@ final class AuthViewModel: ObservableObject {
                     case .initialSession, .signedIn:
                         if let u = session?.user {
                             print("🔐 Auth state changed: signed in as \(u.email ?? "unknown")")
-                            // Не создаём здесь юзера, это будет в signIn() или restoreUser()
                         }
                     case .signedOut:
                         self.user = nil
@@ -57,7 +56,6 @@ final class AuthViewModel: ObservableObject {
                     }
                 }
             } catch is CancellationError {
-                // ✅ Нормально, Task был отменён при deinit
                 print("🛑 Auth state listener cancelled")
             } catch {
                 print("❌ Auth state listener error: \(error)")
@@ -68,6 +66,22 @@ final class AuthViewModel: ObservableObject {
     // MARK: - Sign Up
     
     func signUp(name: String, email: String, password: String, context: ModelContext) async {
+        // Валидация входных данных
+        guard !name.trimmingCharacters(in: .whitespaces).isEmpty else {
+            errorMessage = "Name cannot be empty"
+            return
+        }
+        
+        guard !email.trimmingCharacters(in: .whitespaces).isEmpty, email.contains("@") else {
+            errorMessage = "Please enter a valid email"
+            return
+        }
+        
+        guard password.count >= 6 else {
+            errorMessage = "Password must be at least 6 characters"
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
         
@@ -100,6 +114,17 @@ final class AuthViewModel: ObservableObject {
     // MARK: - Sign In
     
     func signIn(email: String, password: String, context: ModelContext) async {
+        // Валидация входных данных
+        guard !email.trimmingCharacters(in: .whitespaces).isEmpty, email.contains("@") else {
+            errorMessage = "Please enter a valid email"
+            return
+        }
+        
+        guard !password.isEmpty else {
+            errorMessage = "Password cannot be empty"
+            return
+        }
+        
         isLoading = true
         errorMessage = nil
         
@@ -189,17 +214,19 @@ final class AuthViewModel: ObservableObject {
     
     // MARK: - Sign Out
     
-    func signOut() {
+    func signOut() async {
+        isLoading = true
         user = nil
         errorMessage = nil
         
-        Task {
-            do {
-                try await client.auth.signOut()
-                print("✅ Signed out")
-            } catch {
-                print("❌ Sign out failed:", error.localizedDescription)
-            }
+        do {
+            try await client.auth.signOut()
+            print("✅ Signed out successfully")
+        } catch {
+            errorMessage = "Failed to sign out: \(error.localizedDescription)"
+            print("❌ Sign out failed:", error.localizedDescription)
         }
+        
+        isLoading = false
     }
 }

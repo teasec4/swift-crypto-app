@@ -14,7 +14,6 @@ import Foundation
 final class PortfolioViewModel: ObservableObject {
     @Published private(set) var assets: [UserAsset] = [] {
         didSet {
-            // ✅ Принудительно отправляем обновление при изменении массива
             objectWillChange.send()
         }
     }
@@ -116,7 +115,6 @@ final class PortfolioViewModel: ObservableObject {
         if let index = assets.firstIndex(where: { $0.id == asset.id }) {
             assets[index].amount = newAmount  // ✅ Обновляем локально
             try context.save()
-            // ✅ Не перезагружаем всё
         }
     }
     
@@ -192,11 +190,6 @@ final class PortfolioViewModel: ObservableObject {
         
         print("🔄 Force refreshing asset prices...")
         lastPriceRefreshTime = .distantPast
-        
-        // ✅ Инвалидируем кэш перед принудительным обновлением
-        if let repository = repository as? CoinRepository {
-            repository.invalidatePricesCache()
-        }
         
         do {
             let ids = assets.map { $0.coinID }

@@ -2,8 +2,6 @@
 //  MarketDetailViewModel.swift
 //  CryptoAsyncAwait
 //
-//  Created by Максим Ковалев
-//
 
 import Foundation
 import Combine
@@ -18,9 +16,14 @@ final class MarketDetailViewModel: ObservableObject {
     private let repository: ChartRepositoryProtocol
     
     init(repository: ChartRepositoryProtocol? = nil) {
-           self.repository = repository ?? DependencyContainer.shared.chartDataRepository
-       }
-        
+        // ✅ Явно используем переданный repository, если нет - берём из container
+        if let repository = repository {
+            self.repository = repository
+        } else {
+            self.repository = DependencyContainer.shared.chartDataRepository
+        }
+    }
+         
     
     func fetchChartData(for coinID: String, days: Int = 30) async {
         isLoading = true

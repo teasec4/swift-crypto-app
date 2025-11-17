@@ -52,26 +52,6 @@ struct ProfileView: View {
                         .padding(24)
                         .cardStyle(themeManager)
                         
-                        // Stats section
-                        VStack(spacing: 12) {
-                            HStack(spacing: 16) {
-                                StatCard(
-                                    icon: "calendar",
-                                    title: "Member Since",
-                                    value: "Oct 2025",
-                                    theme: themeManager
-                                )
-                                StatCard(
-                                    icon: "checkmark.circle.fill",
-                                    title: "Status",
-                                    value: "Active",
-                                    valueColor: .green,
-                                    theme: themeManager
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 4)
-                        
                         // Settings section
                         VStack(spacing: 0) {
                             SettingsRowWithToggle(
@@ -84,30 +64,30 @@ struct ProfileView: View {
                             Divider()
                                 .padding(.leading, 48)
                             
-                            SettingsRow(
+                            SettingsRowDisabled(
                                 icon: "bell.badge",
                                 title: "Notifications",
-                                subtitle: "Manage alerts",
+                                subtitle: "Coming soon",
                                 theme: themeManager
                             )
                             
                             Divider()
                                 .padding(.leading, 48)
                             
-                            SettingsRow(
+                            SettingsRowDisabled(
                                 icon: "lock.fill",
                                 title: "Security",
-                                subtitle: "Password & 2FA",
+                                subtitle: "Coming soon",
                                 theme: themeManager
                             )
                             
                             Divider()
                                 .padding(.leading, 48)
                             
-                            SettingsRow(
+                            SettingsRowDisabled(
                                 icon: "doc.text",
                                 title: "Terms & Privacy",
-                                subtitle: "Legal information",
+                                subtitle: "Coming soon",
                                 theme: themeManager
                             )
                         }
@@ -118,8 +98,8 @@ struct ProfileView: View {
                         
                         // Sign Out button
                         Button(role: .destructive) {
-                            withAnimation(.easeInOut) {
-                                authVM.signOut()
+                            Task {
+                                await authVM.signOut()
                             }
                         } label: {
                             HStack(spacing: 8) {
@@ -129,7 +109,7 @@ struct ProfileView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding(14)
-                            .background(AppColors.accentRed.opacity(0.1))
+                            .background(AppColors.accentRed.opacity(themeManager.isDarkMode ? 0.15 : 0.1))
                             .foregroundColor(AppColors.accentRed)
                             .cornerRadius(12)
                             .fontWeight(.semibold)
@@ -146,7 +126,7 @@ struct ProfileView: View {
                             }
                             .foregroundColor(AppColors.accentRed)
                             .padding(12)
-                            .background(AppColors.accentRed.opacity(0.1))
+                            .background(AppColors.accentRed.opacity(themeManager.isDarkMode ? 0.15 : 0.1))
                             .cornerRadius(8)
                             .transition(.opacity)
                         }
@@ -196,7 +176,7 @@ struct StatCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(12)
-        .background(theme.borderColor.opacity(0.5))
+        .background(theme.isDarkMode ? theme.borderColor.opacity(0.6) : AppColors.lightBorder.opacity(0.8))
         .cornerRadius(10)
     }
 }
@@ -230,6 +210,39 @@ struct SettingsRow: View {
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 12)
+    }
+}
+
+struct SettingsRowDisabled: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let theme: ThemeManager
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundColor(.gray)
+                .frame(width: 24)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(.gray)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.gray.opacity(0.7))
+            }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.gray.opacity(0.5))
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 12)
+        .opacity(0.6)
     }
 }
 

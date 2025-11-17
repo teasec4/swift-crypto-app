@@ -127,37 +127,78 @@ struct AddAssetFormView: View {
                         }
                     }
                 } label: {
-                    HStack {
-                        Text(viewModel.submitButtonTitle)
-                            .foregroundStyle(.black)
-                        Spacer()
-                        HStack {
-                            AsyncImage(url: coin.imageUrl) { image in
-                                image.resizable().scaledToFit().frame(width: 20, height: 20)
-                            } placeholder: {
-                                Circle().fill(Color(.systemGray5)).frame(width: 20, height: 20)
+                    ZStack {
+                        // Gradient background
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.blue.opacity(0.9),
+                                Color.blue.opacity(0.7)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        
+                        VStack(spacing: 4) {
+                            // Top row: Title + Amount
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(viewModel.submitButtonTitle)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                    
+                                    HStack(spacing: 6) {
+                                        AsyncImage(url: coin.imageUrl) { image in
+                                            image.resizable().scaledToFit()
+                                        } placeholder: {
+                                            Circle().fill(Color(.systemGray4))
+                                        }
+                                        .frame(width: 16, height: 16)
+                                        
+                                        Text("\(viewModel.inputAmount) \(coin.symbol.uppercased())")
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                            .opacity(0.9)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                // Value indicator
+                                HStack(spacing: 4) {
+                                    Image(systemName: "dollarsign.circle.fill")
+                                        .font(.system(size: 14))
+                                    Text(viewModel.totalValue.toCurrency())
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.white.opacity(0.2))
+                                .cornerRadius(6)
                             }
-                            Text(viewModel.inputAmount)
-                                .foregroundStyle(.black)
+                            
+                            // Loading indicator
+                            if viewModel.isLoading {
+                                HStack(spacing: 6) {
+                                    ProgressView()
+                                        .scaleEffect(0.8, anchor: .center)
+                                    Text("Processing...")
+                                        .font(.caption2)
+                                        .opacity(0.8)
+                                }
+                            }
                         }
-                        Spacer()
-                        HStack {
-                            Image(systemName: "dollarsign.circle.fill")
-                                .foregroundColor(.green)
-                                .frame(width: 20, height: 20)
-                            Text("≈ \(viewModel.totalValue.toCurrency())")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.green)
-                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 12)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(.white)
+                    .frame(height: viewModel.isLoading ? 60 : 52)
+                    .foregroundColor(.white)
                     .cornerRadius(12)
                 }
                 .padding(.horizontal)
                 .disabled(amountValue <= 0 || viewModel.isLoading)
+                .opacity(amountValue <= 0 ? 0.5 : 1)
             }
             
             // Toast

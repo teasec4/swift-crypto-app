@@ -25,7 +25,7 @@ final class AddAssetViewModel: ObservableObject {
     @Published var isLoading = false
     
     private let validator: AssetValidatorProtocol
-    weak var portfolioViewModel: PortfolioViewModel?
+    private weak var portfolioViewModel: PortfolioViewModel?
     
     init(
         validator: AssetValidatorProtocol = AssetValidator(),
@@ -68,6 +68,13 @@ final class AddAssetViewModel: ObservableObject {
             return
         }
         
+        // ✅ Явная проверка что portfolioViewModel всё ещё существует
+        guard let portfolioViewModel = portfolioViewModel else {
+            errorMessage = "Portfolio is not available. Please try again."
+            print("❌ AddAssetViewModel: portfolioViewModel is nil")
+            return
+        }
+        
         isLoading = true
         defer { isLoading = false }
         
@@ -75,12 +82,12 @@ final class AddAssetViewModel: ObservableObject {
             switch mode {
             case .add(let coin):
                 print("💾 Saving: \(coin.name) x\(amount)")
-                try portfolioViewModel?.addAsset(coin: coin, amount: amount, context: context)
+                try portfolioViewModel.addAsset(coin: coin, amount: amount, context: context)
                 print("✅ Save successful!")
                 reset()
             case .edit(let asset):
                 print("📝 Updating: \(asset.coinName) to \(amount)")
-                try portfolioViewModel?.updateAsset(asset, newAmount: amount, context: context)
+                try portfolioViewModel.updateAsset(asset, newAmount: amount, context: context)
                 print("✅ Update successful!")
                 reset()
             case .idle:

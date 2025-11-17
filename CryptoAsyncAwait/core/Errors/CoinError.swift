@@ -11,32 +11,36 @@ enum CoinError: Error, LocalizedError, Equatable {
     case invalidURL
     case serverError
     case invalidData
-    case unkown(Error)
+    case networkError(String)  // ✅ More specific for network issues
+    case unknown(String)        // ✅ Changed from "unkown" to "unknown"
     
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return ""
+            return "Invalid URL"  // ✅ Was empty string
         case .serverError:
             return "There was an error with the server. Please try again later"
         case .invalidData:
             return "The coin data is invalid. Please try again later"
-        case .unkown(let error):
-            return error.localizedDescription
+        case .networkError(let message):
+            return "Network error: \(message)"
+        case .unknown(let message):  // ✅ Changed from "unkown"
+            return message
         }
     }
     
     static func == (lhs: CoinError, rhs: CoinError) -> Bool {
-            switch (lhs, rhs) {
-            case (.invalidURL, .invalidURL),
-                 (.serverError, .serverError),
-                 (.invalidData, .invalidData):
-                return true
-            case (.unkown, .unkown):
-                return true
-            default:
-                return false
-            }
+        switch (lhs, rhs) {
+        case (.invalidURL, .invalidURL),
+             (.serverError, .serverError),
+             (.invalidData, .invalidData):
+            return true
+        case (.networkError(let lMsg), .networkError(let rMsg)):
+            return lMsg == rMsg
+        case (.unknown(let lMsg), .unknown(let rMsg)):  // ✅ Changed from "unkown"
+            return lMsg == rMsg
+        default:
+            return false
         }
-    
+    }
 }

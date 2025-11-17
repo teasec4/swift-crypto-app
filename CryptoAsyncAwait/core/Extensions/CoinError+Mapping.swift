@@ -16,7 +16,7 @@ final class CoinErrorMappingService: ErrorMappingService {
             case .badServerResponse:
                 return CoinError.serverError
             default:
-                return CoinError.unkown(urlError)
+                return CoinError.unknown(urlError.localizedDescription)
             }
         }
         
@@ -24,6 +24,6 @@ final class CoinErrorMappingService: ErrorMappingService {
             return CoinError.invalidData
         }
         
-        return CoinError.unkown(error)
+        return CoinError.unknown(error.localizedDescription)
     }
 }

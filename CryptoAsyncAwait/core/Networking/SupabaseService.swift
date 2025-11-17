@@ -1,5 +1,5 @@
 //
-//  SupabaseManager.swift
+//  SupabaseService.swift  // ✅ Исправлено (было SupabaseManager в комментарии)
 //  CryptoAsyncAwait
 //
 //  Created by Максим Ковалев on 10/13/25.
@@ -25,14 +25,14 @@ final class SupabaseService {
         }
         
         // MARK: - Initialize client
-                client = SupabaseClient(
-                    supabaseURL: url,
-                    supabaseKey: key
-                )
+        client = SupabaseClient(
+            supabaseURL: url,
+            supabaseKey: key
+        )
         
         Task {
-                    await recoverSessionIfNeeded()
-                }
+            await recoverSessionIfNeeded()
+        }
     }
 }
 

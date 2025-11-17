@@ -20,6 +20,14 @@ struct SignUpView: View {
         case name, email, password
     }
     
+    private var isFormValid: Bool {
+        !name.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !email.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !password.isEmpty &&
+        email.contains("@") &&
+        password.count >= 6
+    }
+    
     var body: some View {
         
             
@@ -28,9 +36,9 @@ struct SignUpView: View {
                 
                     
                 
-                InputField(icon: "preson.crop.circle", placeholder: "name", text: $name)
+                InputField(icon: "person.crop.circle", placeholder: "Name", text: $name)
                 InputField(icon: "envelope", placeholder: "Email", text: $email)
-                InputField(icon: "lock", placeholder: "Password", text: $password, isSecure: true)
+                InputField(icon: "lock", placeholder: "Password (min 6)", text: $password, isSecure: true)
                 
                 Button(action: {
                     focusedField = nil
@@ -39,15 +47,16 @@ struct SignUpView: View {
                     Text("Sign Up")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.green)
+                        .background(isFormValid ? Color.green : Color.gray)
                         .foregroundColor(.white)
                         .clipShape(Capsule())
                 }
+                .disabled(!isFormValid || authVM.isLoading)
                 
                 HStack(spacing: 4) {
-                    Text("Don't have an account?")
+                    Text("Already have an account?")
                     Button(action: {dismiss()}) {
-                        Text("Log In")
+                        Text("Log In").bold()
                     }
                 }
                 .font(.footnote)

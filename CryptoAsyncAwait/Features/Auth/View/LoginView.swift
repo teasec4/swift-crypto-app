@@ -18,6 +18,12 @@ struct LoginView: View {
         case email, password
     }
     
+    private var isFormValid: Bool {
+        !email.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !password.isEmpty &&
+        email.contains("@")
+    }
+    
     var body: some View {
         NavigationStack {
                 VStack(spacing: 20) {
@@ -34,10 +40,11 @@ struct LoginView: View {
                         Text("Sign In")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.green)
+                            .background(isFormValid ? Color.green : Color.gray)
                             .foregroundColor(.white)
                             .clipShape(Capsule())
                     }
+                    .disabled(!isFormValid || authVM.isLoading)
                     
                     HStack(spacing: 4) {
                         Text("Don't have an account?")
