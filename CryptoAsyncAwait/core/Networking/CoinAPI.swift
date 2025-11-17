@@ -6,7 +6,7 @@
 //
 import Foundation
 
-final class CoinAPI: CoinDataFetchingService, GlobalMarketDataFetchingService, ChartDataFetchingService, SimplePriceFetchingService {
+final class CoinAPI: CoinDataFetchingService, ChartDataFetchingService, SimplePriceFetchingService {
     private let network: NetworkServiceProtocol
     private let baseURL = "https://api.coingecko.com/api/v3/"
     
@@ -18,13 +18,6 @@ final class CoinAPI: CoinDataFetchingService, GlobalMarketDataFetchingService, C
     func fetchCoins(page: Int, limit: Int) async throws -> [Coin] {
         let url = URL(string: "\(baseURL)/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=\(limit)&page=\(page)&sparkline=false")!
         return try await network.request(url)
-    }
-    
-    // MARK: - GlobalMarketDataFetchingService
-    func fetchGlobalData() async throws -> GlobalMarketData {
-        let url = URL(string: "\(baseURL)/global")!
-        let response: GlobalResponse = try await network.request(url)
-        return response.data
     }
     
     // MARK: - ChartDataFetchingService

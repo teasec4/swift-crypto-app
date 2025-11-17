@@ -8,11 +8,6 @@
 import Foundation
 import SwiftData
 
-/// Protocol для сохранения и загрузки пользователя
-protocol UserPersistenceServiceProtocol {
-    func saveUser(_ user: UserEntity, context: ModelContext) throws
-}
-
 final class UserPersistenceService: UserPersistenceServiceProtocol {
     
     func saveUser(_ user: UserEntity, context: ModelContext) throws {

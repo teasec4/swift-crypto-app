@@ -7,12 +7,7 @@
 import Foundation
 import Alamofire
 
-protocol NetworkServiceProtocol{
-    func request<T: Decodable>(_ url: URL) async throws -> T
-    func requestRawJSON(_ url: URL) async throws -> [String: Any]
-}
-
-final class NetworkService: NetworkServiceProtocol{
+final class NetworkService: NetworkServiceProtocol {
     private let session: Session
     private let logger = NetworkLogger()
     
